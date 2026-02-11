@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Market Map - Barq TMS</title>
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+        /* Hide datalist arrow in Chrome/Edge */
+        input[list]::-webkit-calendar-picker-indicator {
+            display: none !important;
+        }
+
+        /* 3-Column Layout */
+        .market-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+        @media (max-width: 992px) {
+            .market-columns { grid-template-columns: 1fr; }
+        }
+
+        /* Column Headers */
+        .col-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 5px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .col-header h4 {
+            margin: 0;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+        .col-count {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Card Styles */
+        .zone-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .zone-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* State Specifics */
+        .card-open { border-left: 3px solid var(--text-secondary); }
+        .card-targeted { border-left: 3px solid var(--info-color); background: rgba(var(--info-rgb), 0.05); }
+        .card-completed { border-left: 3px solid var(--success-color); opacity: 0.7; }
+
+        /* Card Content */
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .card-cat {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        /* Mini Action Buttons */
+        .btn-mini {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: 0.2s;
+        }
+        .btn-mini:hover { background: rgba(255,255,255,0.1); color: white; }
+        .btn-mini.btn-target { border-color: var(--info-color); color: var(--info-color); }
+        .btn-mini.btn-target:hover { background: var(--info-color); color: white; }
+        
+        .btn-mini.btn-complete { border-color: var(--success-color); color: var(--success-color); }
+        .btn-mini.btn-complete:hover { background: var(--success-color); color: white; }
+
+        .btn-delete { color: var(--danger-color); opacity: 0.5; }
+        .btn-delete:hover { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <!-- Sidebar will be same as others, just need to add the link manually to all pages or load dynamically -->
+        <!-- For now, assuming standard sidebar structure copy-paste with active state on Market Map if we had it -->
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i class="fa-solid fa-briefcase" style="font-size: 32px; color: white"></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text">Dashboard</span>
+            </a>
+            <a href="market-map.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-map-location-dot"></i
+              ></span>
+              <span class="nav-item-text">Market Map</span>
+            </a>
+            <a href="my-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-tasks"></i
+              ></span>
+              <span class="nav-item-text">My Tasks</span>
+            </a>
+            <a href="team-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users-gear"></i
+              ></span>
+              <span class="nav-item-text">Team Tasks</span>
+            </a>
+            <a href="team-members.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users"></i
+              ></span>
+              <span class="nav-item-text">Team Members</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-calendar"></i
+              ></span>
+              <span class="nav-item-text">Calendar</span>
+            </a>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar">TL</div>
+                <div>
+                   <div class="sidebar-user-name">Loading...</div>
+                   <div class="sidebar-user-role">Team Leader</div>
+                </div>
+            </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+            <h2 style="margin:0;">The Market Map</h2>
+          </div>
+          <div class="header-right">
+             <button class="btn btn-primary" onclick="openAddZoneModal()">
+                 <i class="fa-solid fa-plus"></i> Add Territory
+             </button>
+          </div>
+        </header>
+
+        <div class="content">
+            <!-- Filters -->
+            <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-sm btn-outline active" onclick="filterMap('all')">All</button>
+                <button class="btn btn-sm btn-outline" onclick="filterMap('Retail')">Retail</button>
+                <button class="btn btn-sm btn-outline" onclick="filterMap('Corporate')">Corporate</button>
+                <button class="btn btn-sm btn-outline" onclick="filterMap('Gov')">Government</button>
+            </div>
+
+            <div class="market-columns">
+                <!-- Open -->
+                <div class="col-section">
+                    <div class="col-header">
+                        <h4 style="color:var(--text-secondary)">Open / Untouched</h4>
+                        <span class="col-count" id="count-open">0</span>
+                    </div>
+                    <div id="list-open"></div>
+                </div>
+
+                <!-- Targeted -->
+                <div class="col-section">
+                    <div class="col-header">
+                        <h4 style="color:var(--info-color)">Targeted</h4>
+                        <span class="col-count" id="count-targeted">0</span>
+                    </div>
+                    <div id="list-targeted"></div>
+                </div>
+
+                <!-- Completed -->
+                <div class="col-section">
+                    <div class="col-header">
+                        <h4 style="color:var(--success-color)">Completed</h4>
+                        <span class="col-count" id="count-completed">0</span>
+                    </div>
+                    <div id="list-completed"></div>
+                </div>
+            </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Add Zone Modal -->
+    <div id="addZoneModal" class="modal-backdrop d-none">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Territory Zone</h3>
+                    <button class="btn-icon" onclick="closeAddZoneModal()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Zone / Governorate Name</label>
+                        <input type="text" id="zoneName" class="form-control" placeholder="e.g. Dakahlia, Damietta...">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" id="zoneCategory" class="form-control" list="categoryList" placeholder="Select or type category...">
+                        <datalist id="categoryList">
+                            <option value="Retail">
+                            <option value="Corporate">
+                            <option value="Gov">
+                            <option value="Health">
+                            <option value="GYM">
+                            <option value="Other">
+                        </datalist>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeAddZoneModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveZone()">Add Zone</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/pages/team-leader/market-map.js"></script>
+  </body>
+</html>

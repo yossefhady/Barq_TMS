@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Barq TMS - System Check</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #0a0a0a;
+        color: #f2f0d9;
+        padding: 40px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        color: #7e2d96;
+        margin-bottom: 30px;
+      }
+
+      .check-item {
+        background: #121212;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #7e2d96;
+      }
+
+      .check-item h3 {
+        margin-bottom: 10px;
+        color: #88d3ce;
+      }
+
+      .status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 14px;
+        margin-left: 10px;
+      }
+
+      .status.ok {
+        background: #10b981;
+        color: white;
+      }
+
+      .status.error {
+        background: #ef4444;
+        color: white;
+      }
+
+      .status.warning {
+        background: #f59e0b;
+        color: white;
+      }
+
+      .details {
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(126, 45, 150, 0.1);
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        overflow-x: auto;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #7e2d96, #5c216e);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(126, 45, 150, 0.4);
+      }
+
+      pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 Barq TMS - System Check</h1>
+
+      <div class="check-item" id="check-scripts">
+        <h3>
+          Script Loading
+          <span class="status" id="status-scripts">Checking...</span>
+        </h3>
+        <div class="details" id="details-scripts">
+          Checking if all required scripts are loaded...
+        </div>
+      </div>
+
+      <div class="check-item" id="check-api">
+        <h3>
+          API Configuration
+          <span class="status" id="status-api">Checking...</span>
+        </h3>
+        <div class="details" id="details-api">
+          Checking API configuration...
+        </div>
+      </div>
+
+      <div class="check-item" id="check-auth">
+        <h3>
+          Authentication System
+          <span class="status" id="status-auth">Checking...</span>
+        </h3>
+        <div class="details" id="details-auth">
+          Checking authentication system...
+        </div>
+      </div>
+
+      <div class="check-item" id="check-paths">
+        <h3>
+          File Paths <span class="status" id="status-paths">Checking...</span>
+        </h3>
+        <div class="details" id="details-paths">
+          Checking if all files are accessible...
+        </div>
+      </div>
+
+      <div style="margin-top: 30px; text-align: center">
+        <a href="pages/auth/login.html" class="btn">Go to Login Page</a>
+      </div>
+    </div>
+
+    <script src="frontend/scripts/utils/utils.js"></script>
+    <script src="frontend/scripts/utils/api.js"></script>
+    <script src="frontend/scripts/utils/auth.js"></script>
+
+    <script>
+      // Check Scripts
+      setTimeout(() => {
+        const scriptsOk =
+          typeof utils !== "undefined" &&
+          typeof API !== "undefined" &&
+          typeof auth !== "undefined";
+
+        const statusScripts = document.getElementById("status-scripts");
+        const detailsScripts = document.getElementById("details-scripts");
+
+        if (scriptsOk) {
+          statusScripts.textContent = "OK";
+          statusScripts.className = "status ok";
+          detailsScripts.innerHTML = `
+          <strong>✓ All scripts loaded successfully</strong><br>
+          - utils: ${typeof utils !== "undefined" ? "✓" : "✗"}<br>
+          - API: ${typeof API !== "undefined" ? "✓" : "✗"}<br>
+          - auth: ${typeof auth !== "undefined" ? "✓" : "✗"}
+        `;
+        } else {
+          statusScripts.textContent = "ERROR";
+          statusScripts.className = "status error";
+          detailsScripts.innerHTML = `
+          <strong>✗ Some scripts failed to load</strong><br>
+          - utils: ${typeof utils !== "undefined" ? "✓" : "✗ MISSING"}<br>
+          - API: ${typeof API !== "undefined" ? "✓" : "✗ MISSING"}<br>
+          - auth: ${typeof auth !== "undefined" ? "✓" : "✗ MISSING"}<br><br>
+          <em>Check browser console for errors</em>
+        `;
+        }
+
+        // Check API
+        const statusApi = document.getElementById("status-api");
+        const detailsApi = document.getElementById("details-api");
+
+        if (typeof API !== "undefined" && API_CONFIG) {
+          statusApi.textContent = "OK";
+          statusApi.className = "status ok";
+          detailsApi.innerHTML = `
+          <strong>✓ API Configuration loaded</strong><br>
+          - Base URL: <code>${API_CONFIG.BASE_URL}</code><br>
+          - Token Key: <code>${API_CONFIG.TOKEN_KEY}</code><br>
+          - User Key: <code>${API_CONFIG.USER_KEY}</code>
+        `;
+        } else {
+          statusApi.textContent = "ERROR";
+          statusApi.className = "status error";
+          detailsApi.textContent = "API configuration not loaded";
+        }
+
+        // Check Auth
+        const statusAuth = document.getElementById("status-auth");
+        const detailsAuth = document.getElementById("details-auth");
+
+        if (typeof auth !== "undefined") {
+          const isAuthenticated = auth.isAuthenticated();
+          const currentUser = auth.getCurrentUser();
+
+          statusAuth.textContent = isAuthenticated
+            ? "LOGGED IN"
+            : "NOT LOGGED IN";
+          statusAuth.className = `status ${isAuthenticated ? "warning" : "ok"}`;
+
+          detailsAuth.innerHTML = `
+          <strong>✓ Authentication system initialized</strong><br>
+          - Status: ${
+            isAuthenticated ? "User is logged in" : "No active session"
+          }<br>
+          ${
+            currentUser
+              ? `- User: ${currentUser.Name} (Role: ${currentUser.Role})`
+              : "- No user data"
+          }
+        `;
+        } else {
+          statusAuth.textContent = "ERROR";
+          statusAuth.className = "status error";
+          detailsAuth.textContent = "Authentication system not loaded";
+        }
+
+        // Check Paths
+        const statusPaths = document.getElementById("status-paths");
+        const detailsPaths = document.getElementById("details-paths");
+
+        statusPaths.textContent = "INFO";
+        statusPaths.className = "status ok";
+        detailsPaths.innerHTML = `
+        <strong>File Structure:</strong><br>
+        Current location: <code>${window.location.pathname}</code><br><br>
+        <strong>Expected structure:</strong><br>
+        <pre>
+barq-dashboard/
+├── frontend/
+│   ├── pages/
+│   │   └── auth/
+│   │       └── login.html
+│   ├── scripts/
+│   │   └── utils/
+│   │       ├── api.js
+│   │       ├── auth.js
+│   │       └── utils.js
+│   └── styles/
+│       └── main.css
+        </pre>
+        <em>Make sure you're opening this file from the project root</em>
+      `;
+
+        // Console log for debugging
+        console.log("=== System Check Results ===");
+        console.log("Scripts loaded:", scriptsOk);
+        console.log("API available:", typeof API !== "undefined");
+        console.log("Auth available:", typeof auth !== "undefined");
+        console.log("Utils available:", typeof utils !== "undefined");
+        if (typeof auth !== "undefined") {
+          console.log("Is authenticated:", auth.isAuthenticated());
+        }
+        console.log("==========================");
+      }, 500);
+    </script>
+  </body>
+</html>

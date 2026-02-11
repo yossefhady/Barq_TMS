@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Tasks - Barq TMS</title>
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i
+              class="fa-solid fa-briefcase"
+              style="font-size: 32px; color: white"
+            ></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text">Dashboard</span>
+            </a>
+            <a href="market-map.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-map-location-dot"></i
+              ></span>
+              <span class="nav-item-text">Market Map</span>
+            </a>
+            <a href="my-tasks.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-tasks"></i
+              ></span>
+              <span class="nav-item-text">My Tasks</span>
+            </a>
+            <a href="team-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users-gear"></i
+              ></span>
+              <span class="nav-item-text">Team Tasks</span>
+            </a>
+            <a href="team-members.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users"></i
+              ></span>
+              <span class="nav-item-text">Team Members</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-calendar"></i
+              ></span>
+              <span class="nav-item-text">Calendar</span>
+            </a>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">TL</div>
+            <div>
+              <div class="sidebar-user-name">Loading...</div>
+              <div class="sidebar-user-role">Team Leader</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="search-bar">
+              <span class="search-icon"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></span>
+              <input
+                type="text"
+                class="search-input"
+                placeholder="Search tasks..."
+                id="searchInput"
+              />
+            </div>
+          </div>
+          <div class="header-right">
+            <button class="header-btn notification-btn">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+            <div class="user-menu">
+              <div class="user-avatar">TL</div>
+              <span class="user-name">Team Leader</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="content">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-6)">
+            <div>
+              <h2>My Tasks</h2>
+              <p style="color: var(--text-secondary); margin: 0">
+                Manage your assigned tasks and review team submissions
+              </p>
+            </div>
+            <button class="btn btn-primary" onclick="showCreateSelfTaskModal()">
+                <i class="fa-solid fa-plus"></i> Create Self Task
+            </button>
+          </div>
+
+          <!-- Stats Row -->
+          <div class="stats-row" style="margin-bottom: var(--space-6)">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Self Tasks</span>
+                <span class="stat-value" id="selfTasks">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-clipboard-check"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Employee Submissions</span>
+                <span class="stat-value" id="employeeSubmissions">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-list-check"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">In Progress (Assigned)</span>
+                <span class="stat-value" id="inProgress">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-check-circle"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Completed</span>
+                <span class="stat-value" id="completedCount">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Tabs -->
+          <div class="card" style="margin-bottom: var(--space-6)">
+            <div class="card-body">
+              <div class="tabs">
+                <button
+                  class="tab-btn active"
+                  data-filter="self"
+                  onclick="filterTasks('self')"
+                >
+                  <i class="fa-solid fa-user"></i> Self Tasks
+                </button>
+                <button
+                  class="tab-btn"
+                  data-filter="employee-review"
+                  onclick="filterTasks('employee-review')"
+                >
+                  <i class="fa-solid fa-user-check"></i> Employee Submissions
+                </button>
+                <button
+                  class="tab-btn"
+                  data-filter="in-progress"
+                  onclick="filterTasks('in-progress')"
+                >
+                  <i class="fa-solid fa-spinner"></i> In Progress
+                </button>
+                <button
+                  class="tab-btn"
+                  data-filter="completed"
+                  onclick="filterTasks('completed')"
+                >
+                  <i class="fa-solid fa-check"></i> Completed
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3 id="tableTitle">Received Tasks</h3>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead id="tasksTableHead">
+                  <tr>
+                    <th>Task</th>
+                    <th>Project</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tasksBody">
+                  <tr>
+                    <td colspan="7" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Sales Monthly Targets (Showing here for Sales TL) -->
+          <div id="salesTargetContainer" style="margin-top: 20px; display: none;">
+              <div class="card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                      <h3><i class="fa-solid fa-bullseye"></i> Monthly Sales Targets</h3>
+                      <small class="text-muted"><i class="fa-solid fa-circle-info"></i> Your activity updates this automatically</small>
+                  </div>
+                  <div class="card-body">
+                      
+                      <!-- Loading State -->
+                      <div id="salesTargetLoading" class="text-center py-3">
+                          <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+                          <p class="mt-2 text-muted">Checking sales targets...</p>
+                      </div>
+
+                      <!-- Content (Hidden by default) -->
+                      <div id="salesTargetContent" class="d-none">
+
+                      <!-- New Clients -->
+                      <div class="progress-group" style="margin-bottom: 15px;">
+                          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                               <label>New Clients Acquired</label>
+                               <span id="targetClientsText">0 / 0</span>
+                          </div>
+                          <div class="progress-bar-bg" style="background:rgba(255,255,255,0.1); height:20px; border-radius:10px; overflow:hidden;">
+                               <div id="targetClientsBar" style="width:0%; height:100%; background:var(--primary-color);"></div>
+                          </div>
+                      </div>
+
+                      <!-- Meetings -->
+                      <div class="progress-group" style="margin-bottom: 15px;">
+                          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                               <label>Meetings Held</label>
+                               <span id="targetMeetingsText">0 / 0</span>
+                          </div>
+                          <div class="progress-bar-bg" style="background:rgba(255,255,255,0.1); height:20px; border-radius:10px; overflow:hidden;">
+                               <div id="targetMeetingsBar" style="width:0%; height:100%; background:var(--info);"></div>
+                          </div>
+                      </div>
+
+                      <!-- Data Collection -->
+                      <div class="progress-group">
+                          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                               <label>Data Collection Tasks</label>
+                               <span id="targetDataText">0 / 0</span>
+                          </div>
+                          <div class="progress-bar-bg" style="background:rgba(255,255,255,0.1); height:20px; border-radius:10px; overflow:hidden;">
+                               <div id="targetDataBar" style="width:0%; height:100%; background:var(--success);"></div>
+                          </div>
+                      </div>
+
+                    </div> <!-- End of salesTargetContent -->
+                  </div>
+              </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Review Task Modal -->
+    <div id="reviewModal" class="modal-backdrop d-none">
+      <div class="modal-dialog" style="max-width: 700px">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Review Task</h3>
+            <button class="btn-icon" onclick="closeReviewModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- Review Details Grid -->
+            <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4); background: var(--surface-light); padding: var(--space-4); border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.05);">
+                <div class="detail-item">
+                    <label class="detail-label" style="font-size: 0.85em; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-heading" style="margin-right: 6px;"></i> Task</label>
+                    <div class="detail-value" id="reviewTaskTitle" style="font-size: 1.1em; font-weight: 600; color: var(--text-primary);">-</div>
+                </div>
+                
+                <div class="detail-item">
+                    <label class="detail-label" style="font-size: 0.85em; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-align-left" style="margin-right: 6px;"></i> Description</label>
+                    <div class="detail-value" id="reviewDescription" style="white-space: pre-wrap; font-size: 0.95em; line-height: 1.5; color: var(--text-secondary);">-</div>
+                </div>
+
+                <div class="detail-item">
+                    <label class="detail-label" style="font-size: 0.85em; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-user" style="margin-right: 6px;"></i> Assigned To</label>
+                    <div class="detail-value" id="reviewAssignee" style="font-weight: 500;">-</div>
+                </div>
+
+                <div class="detail-item">
+                    <label class="detail-label" style="font-size: 0.85em; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-calendar-check" style="margin-right: 6px;"></i> Completed Date</label>
+                    <div class="detail-value" id="reviewCompletedDate" style="font-family: monospace;">-</div>
+                </div>
+
+                <!-- Sales KPI Display -->
+                <div class="detail-item" id="reviewSalesKpiGroup" style="display: none; grid-column: span 2; background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary);">
+                    <label class="detail-label" style="font-size: 0.85em; color: var(--primary); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;"><i class="fa-solid fa-chart-line" style="margin-right: 6px;"></i> KPI Value (Result)</label>
+                    <div class="detail-value" id="reviewSalesKpi" style="font-size: 1.5em; font-weight: bold; color: var(--text-primary);">-</div>
+                </div>
+
+                 <div class="detail-item" id="reviewUploadLinkGroup" style="display: none; grid-column: span 2;">
+                    <label class="detail-label" style="font-size: 0.85em; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-link" style="margin-right: 6px;"></i> Submitted Work</label>
+                    <div class="detail-value" style="margin-top: 5px;">
+                        <a id="reviewUploadLink" href="#" target="_blank" class="btn btn-success" style="display: flex; width: 100%; justify-content: center; align-items: center; gap: 10px; padding: 12px; font-size: 1.1em; font-weight: 500;">
+                            <i class="fa-solid fa-folder-open"></i> Access Submitted Files
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.1); margin: var(--space-4) 0;" />
+            
+            <div class="form-group">
+              <label for="reviewAction" style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;"><i class="fa-solid fa-gavel" style="margin-right: 8px; color: var(--warning);"></i> Review Decision</label>
+              <select id="reviewAction" class="form-control" style="height: 45px; font-size: 1.05em;">
+                <option value="approve">Approve & Close Task</option>
+                <option value="revise">Request Revisions</option>
+              </select>
+            </div>
+
+
+            <div class="form-group" id="reviewNotesGroup" style="display: none">
+              <label for="reviewNotes">Notes/Revision Requests:</label>
+              <textarea id="reviewNotes" class="form-control" rows="4" placeholder="Add notes or specify revisions needed..."></textarea>
+              <small class="form-text text-muted">These notes will be sent back to the employee</small>
+            </div>
+            <div class="form-group" id="reviewNewDueDateGroup" style="display: none">
+              <label for="reviewNewDueDate">New Due Date (Optional):</label>
+              <input type="date" id="reviewNewDueDate" class="form-control" placeholder="Select new due date" />
+              <small class="form-text text-muted">Update the task deadline when requesting revisions</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeReviewModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitReview()">
+              <i class="fa-solid fa-paper-plane"></i> Submit Review
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pass Task Modal -->
+    <div id="passTaskModal" class="modal-backdrop d-none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-share"></i> Pass Task to Employee</h3>
+            <button class="btn-icon" onclick="closePassTaskModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Task</label>
+              <div
+                id="passTaskTitle"
+                style="
+                  padding: var(--space-3);
+                  background: var(--surface-secondary);
+                  border-radius: var(--radius-md);
+                  font-weight: 600;
+                "
+              >
+                Task name
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="employeeSelect">Select Employee *</label>
+              <select class="form-control" id="employeeSelect" required>
+                <option value="">Select an employee...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="passTaskNotes">Instructions/Notes</label>
+              <textarea
+                class="form-control"
+                id="passTaskNotes"
+                rows="3"
+                placeholder="Add any instructions or notes for the employee..."
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closePassTaskModal()"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="handlePassTask()"
+              >
+                <i class="fa-solid fa-share"></i> Pass Task
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assign Task Modal -->
+    <div id="assignModal" class="modal-backdrop d-none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-user-plus"></i> Assign Task</h3>
+            <button class="btn-icon" onclick="closeAssignModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="assignForm">
+              <input type="hidden" id="taskIdToAssign" />
+
+              <div class="form-group">
+                <label>Task</label>
+                <div
+                  id="assignTaskName"
+                  style="
+                    padding: var(--space-3);
+                    background: var(--surface-secondary);
+                    border-radius: var(--radius-md);
+                    font-weight: 600;
+                  "
+                >
+                  Task name
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="employeeSelect">Assign to Employee *</label>
+                <select class="form-control" id="employeeSelect" required>
+                  <option value="">Select an employee...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="assignNotes">Instructions</label>
+                <textarea
+                  class="form-control"
+                  id="assignNotes"
+                  rows="3"
+                  placeholder="Add instructions for the employee..."
+                ></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="closeAssignModal()"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fa-solid fa-check"></i> Assign Task
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Details Modal -->
+    <div id="taskDetailsModal" class="modal-backdrop d-none">
+      <div class="modal-dialog" style="max-width: 700px">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Task Details</h3>
+            <button class="btn-icon" onclick="closeTaskDetailsModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="taskDetailsContent">
+              <!-- Content will be loaded dynamically -->
+              <div class="text-center" style="padding: 20px;">
+                <div class="spinner"></div>
+                <p>Loading details...</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer" style="justify-content: space-between;">
+            <div id="taskDetailsActions"></div>
+            <button class="btn btn-secondary" onclick="closeTaskDetailsModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create/Edit Self Task Modal -->
+    <div id="taskModal" class="modal-backdrop d-none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 id="modalTitle">Create Self Task</h3>
+            <button class="btn-icon" onclick="closeCreateSelfModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="taskForm">
+              <input type="hidden" id="taskId" />
+              <div class="form-group">
+                <label for="title">Title *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="title"
+                  name="title"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea
+                  class="form-control"
+                  id="description"
+                  name="description"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="projectId">Project</label>
+                <select class="form-control" id="projectId" name="projectId">
+                  <option value="">Select Project</option>
+                </select>
+              </div>
+              <!-- Assigned To is hidden and auto-set to self -->
+              <input type="hidden" id="assignedToId" />
+              
+              <div class="form-group">
+                <label for="deptId">Department *</label>
+                <select class="form-control" id="deptId" name="deptId" required>
+                  <option value="">Select Department</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="statusId">Status *</label>
+                <select class="form-control" id="statusId" name="statusId" required>
+                    <!-- Will be populated or defaulted to Pending/In Progress -->
+                    <option value="0">Pending</option>
+                    <option value="1">In Progress</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="priorityId">Priority *</label>
+                <select
+                  class="form-control"
+                  id="priorityId"
+                  name="priorityId"
+                  required
+                >
+                    <option value="">Select Priority</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="dueDate">Due Date</label>
+                <input type="date" class="form-control" id="dueDate" name="dueDate" />
+              </div>
+              <div class="form-group">
+                <label for="driveFolderLink">Drive Folder Link</label>
+                <input
+                  type="url"
+                  class="form-control"
+                  id="driveFolderLink"
+                  name="driveFolderLink"
+                  placeholder="https://drive.google.com/..."
+                />
+              </div>
+              <div class="form-group">
+                  <label for="materialDriveFolderLink">Material Drive Folder Link (Optional)</label>
+                  <input
+                    type="url"
+                    class="form-control"
+                    id="materialDriveFolderLink"
+                    name="materialDriveFolderLink"
+                    placeholder="https://drive.google.com/..."
+                  />
+                </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeCreateSelfModal()">
+              Cancel
+            </button>
+            <button class="btn btn-primary" onclick="handleSelfTaskSubmit(event)">
+              Create Task
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SignalR Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/components.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+
+    <!-- Notification System -->
+    <script src="../../scripts/utils/notifications.js"></script>
+    <script src="../../scripts/components/notification-panel.js"></script>
+
+    <script src="../../scripts/pages/team-leader/my-tasks.js"></script>
+  </body>
+</html>

@@ -1,0 +1,300 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clients - Barq TMS</title>
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i
+              class="fa-solid fa-briefcase"
+              style="font-size: 32px; color: white"
+            ></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text"
+                >Dashboard</span
+              >
+            </a>
+            <a href="tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-list-check"></i
+              ></span>
+              <span class="nav-item-text">Tasks</span>
+            </a>
+            <a href="projects.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-folder-open"></i
+              ></span>
+              <span class="nav-item-text"
+                >Projects</span
+              >
+            </a>
+            <a href="clients.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-handshake"></i
+              ></span>
+              <span class="nav-item-text">Clients</span>
+            </a>
+            <a href="targets.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-bullseye"></i
+              ></span>
+              <span class="nav-item-text">Sales Targets</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-calendar"></i
+              ></span>
+              <span class="nav-item-text"
+                >Calendar</span
+              >
+            </a>
+            <a href="analytics.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-chart-line"></i
+              ></span>
+              <span class="nav-item-text"
+                >Analytics</span
+              >
+            </a>
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text"
+                >Settings</span
+              >
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">U</div>
+            <div>
+              <div class="sidebar-user-name">Loading...</div>
+              <div class="sidebar-user-role">Assistant Manager</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="search-bar">
+              <span class="search-icon"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></span>
+              <input
+                type="text"
+                class="search-input"
+                placeholder="Search clients..."
+                id="searchInput"
+              />
+            </div>
+          </div>
+          <div class="header-right">
+            <button class="header-btn notification-btn">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+            <div class="user-menu">
+              <div class="user-avatar">U</div>
+              <span class="user-name">User Name</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="content">
+          <div style="margin-bottom: var(--space-6)">
+            <h2>Client Management</h2>
+            <p style="color: var(--text-secondary); margin: 0">
+              Manage your clients and business relationships
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>All Clients</h3>
+              <button class="btn btn-primary" onclick="showCreateModal()">
+                <i class="fa-solid fa-plus"></i> Add Client
+              </button>
+            </div>
+            <div class="card-body">
+              <table class="table" id="clientsTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Client Name</th>
+                    <th>Projects</th>
+                    <th>Source</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="clientsBody">
+                  <tr>
+                    <td colspan="5" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Create/Edit Client Modal -->
+    <div id="clientModal" class="modal-backdrop d-none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 id="modalTitle">Add Client</h3>
+            <button class="btn-icon" onclick="closeModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="clientForm">
+              <input type="hidden" id="clientId" />
+              <div class="form-group">
+                <label for="name">Name *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="email">Email *</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  required
+                />
+              </div>
+              <div class="form-group" id="usernameGroup">
+                <label for="username">Username *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  name="username"
+                  required
+                />
+              </div>
+              <div class="form-group" id="passwordGroup">
+                <label for="password">Password *</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  minlength="6"
+                  required
+                />
+                <small style="color: var(--text-secondary);">Minimum 6 characters</small>
+              </div>
+              <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                />
+              </div>
+              <div class="form-group">
+                <label for="company">Company</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="company"
+                  name="company"
+                />
+              </div>
+              <div class="form-group">
+                <label for="address">Address</label>
+                <textarea
+                  class="form-control"
+                  id="address"
+                  name="address"
+                  rows="2"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="accountManager">Assigned Account Manager</label>
+                <select class="form-control" id="accountManager" name="accountManager">
+                  <option value="">Select Account Manager</option>
+                </select>
+              </div>
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="closeModal()"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  Save Client
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SignalR Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/components.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+
+    <!-- Notification System -->
+    <script src="../../scripts/utils/notifications.js"></script>
+    <script src="../../scripts/components/notification-panel.js"></script>
+
+    <script src="../../scripts/pages/assistant-manager/clients.js"></script>
+  </body>
+</html>

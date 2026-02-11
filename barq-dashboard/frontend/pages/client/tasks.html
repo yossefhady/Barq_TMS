@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Reviews - Barq TMS</title>
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i
+              class="fa-solid fa-briefcase"
+              style="font-size: 32px; color: white"
+            ></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text">Dashboard</span>
+            </a>
+            <a href="projects.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-folder-open"></i
+              ></span>
+              <span class="nav-item-text">Projects</span>
+            </a>
+            <a href="tasks.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-clipboard-check"></i
+              ></span>
+              <span class="nav-item-text">Task Reviews</span>
+            </a>
+            <a href="project-details.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-list-check"></i
+              ></span>
+              <span class="nav-item-text">Project Details</span>
+            </a>
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">C</div>
+            <div>
+              <div class="sidebar-user-name">Loading...</div>
+              <div class="sidebar-user-role">Client</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="search-bar">
+              <span class="search-icon"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></span>
+              <input
+                type="text"
+                class="search-input"
+                placeholder="Search tasks..."
+                id="searchInput"
+              />
+            </div>
+          </div>
+          <div class="header-right">
+            <button class="header-btn notification-btn">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+            <div class="user-menu">
+              <div class="user-avatar">C</div>
+              <span class="user-name">Client</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="content">
+          <div style="margin-bottom: var(--space-6)">
+            <h2>Task Reviews</h2>
+            <p style="color: var(--text-secondary); margin: 0">
+              Review and approve tasks submitted by your account manager
+            </p>
+          </div>
+
+          <!-- Stats Row -->
+          <div class="stats-row" style="margin-bottom: var(--space-6)">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-hourglass-half"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Pending Review</span>
+                <span class="stat-value" id="pendingCount">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-check-circle"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Approved</span>
+                <span class="stat-value" id="approvedCount">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-times-circle"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Rejected</span>
+                <span class="stat-value" id="rejectedCount">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-clipboard-list"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Tasks</span>
+                <span class="stat-value" id="totalCount">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Tabs -->
+          <div class="card" style="margin-bottom: var(--space-6)">
+            <div class="card-body">
+              <div class="tabs">
+                <button
+                  class="tab-btn active"
+                  data-filter="pending"
+                  onclick="filterTasks('pending')"
+                >
+                  <i class="fa-solid fa-clock"></i> Pending Review
+                  <span class="badge badge-warning" id="badge-pending">0</span>
+                </button>
+                <button
+                  class="tab-btn"
+                  data-filter="approved"
+                  onclick="filterTasks('approved')"
+                >
+                  <i class="fa-solid fa-check"></i> Approved
+                  <span class="badge badge-success" id="badge-approved">0</span>
+                </button>
+                <button
+                  class="tab-btn"
+                  data-filter="rejected"
+                  onclick="filterTasks('rejected')"
+                >
+                  <i class="fa-solid fa-times"></i> Rejected
+                  <span class="badge badge-danger" id="badge-rejected">0</span>
+                </button>
+                <button
+                  class="tab-btn"
+                  data-filter="all"
+                  onclick="filterTasks('all')"
+                >
+                  <i class="fa-solid fa-list"></i> All Tasks
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3 id="tableTitle">Tasks Pending Your Review</h3>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Project</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th>Submitted Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tasksBody">
+                  <tr>
+                    <td colspan="7" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Review Task Modal -->
+    <div id="reviewModal" class="modal-backdrop d-none">
+      <div class="modal-dialog" style="max-width: 900px">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-clipboard-check"></i> Review Task</h3>
+            <button class="btn-icon" onclick="closeReviewModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="taskDetailsReview">
+              <!-- Task details will be rendered here -->
+            </div>
+
+            <div class="form-group" style="margin-top: var(--space-6)">
+              <label for="clientFeedback">Your Feedback</label>
+              <textarea
+                class="form-control"
+                id="clientFeedback"
+                rows="4"
+                placeholder="Provide your feedback or comments..."
+              ></textarea>
+            </div>
+
+            <div
+              class="form-actions"
+              style="margin-top: var(--space-6); gap: var(--space-3)"
+            >
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeReviewModal()"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="rejectTask()"
+              >
+                <i class="fa-solid fa-times"></i> Reject Task
+              </button>
+              <button
+                type="button"
+                class="btn btn-success"
+                onclick="approveTask()"
+              >
+                <i class="fa-solid fa-check"></i> Approve Task
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SignalR Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/components.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+
+    <!-- Notification System -->
+    <script src="../../scripts/utils/notifications.js"></script>
+    <script src="../../scripts/components/notification-panel.js"></script>
+
+    <script src="../../scripts/pages/client/tasks.js"></script>
+  </body>
+</html>

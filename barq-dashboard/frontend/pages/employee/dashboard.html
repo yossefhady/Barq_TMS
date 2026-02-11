@@ -1,0 +1,303 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Barq TMS</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i
+              class="fa-solid fa-briefcase"
+              style="font-size: 32px; color: white"
+            ></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text">Dashboard</span>
+            </a>
+            <a href="my-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-clipboard-list"></i
+              ></span>
+              <span class="nav-item-text">My Tasks</span>
+            </a>
+            <a href="projects.html" class="nav-item" id="nav-projects">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-folder-open"></i
+              ></span>
+              <span class="nav-item-text">Projects</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-calendar"></i
+              ></span>
+              <span class="nav-item-text">Calendar</span>
+            </a>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">U</div>
+            <div>
+              <div class="sidebar-user-name">Loading...</div>
+              <div class="sidebar-user-role">Employee</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main">
+        <!-- Header -->
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="search-bar">
+              <span class="search-icon"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></span>
+              <input type="text" class="search-input" placeholder="Search..." />
+            </div>
+          </div>
+
+          <div class="header-right">
+            <button class="header-btn notification-btn">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+
+            <div class="user-menu">
+              <div class="user-avatar">U</div>
+              <span class="user-name">User Name</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content">
+          <!-- Page Header -->
+          <div style="margin-bottom: var(--space-6)">
+            <h2>Dashboard Overview</h2>
+            <p style="color: var(--text-secondary); margin: 0">
+              Welcome back! Here's your task summary.
+            </p>
+          </div>
+
+          <!-- Weekly War Room (Strategy) - Read Only -->
+          <div id="warRoomContainer" class="card d-none" style="border: 1px solid var(--primary-color); border-left: 5px solid var(--primary-color); background: rgba(59, 130, 246, 0.05); margin-bottom: var(--space-6);">
+              <div class="card-body" style="padding: 20px;">
+                  <div>
+                      <h4 style="margin: 0; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">
+                          <i class="fa-solid fa-chess-knight"></i> Weekly War Room Strategy
+                      </h4>
+                      <p id="warRoomText" style="margin-top: 10px; font-size: 1.2rem; font-weight: 500; color: var(--text-main); font-style: italic;">
+                          Loading strategy...
+                      </p>
+                      <small class="text-muted" id="warRoomDate">Updated recently</small>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Stats Cards Row -->
+          <div class="stats-row" id="statsRow">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-list-check"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">My Tasks</span>
+                <span class="stat-value" id="totalTasks">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Pending Tasks</span>
+                <span class="stat-value" id="pendingTasks">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-check-circle"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Completed Tasks</span>
+                <span class="stat-value" id="completedTasks">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-folder-open"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">My Projects</span>
+                <span class="stat-value" id="totalProjects">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- My Tasks Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3>My Recent Tasks</h3>
+              <a href="my-tasks.html" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-right"></i> View All
+              </a>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead id="tasksTableHead">
+                  <tr>
+                    <th>Task</th>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="recentTasksBody">
+                  <tr>
+                    <td colspan="6" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- My Projects Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3>My Projects</h3>
+              <a href="projects.html" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-right"></i> View All
+              </a>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Project Name</th>
+                    <th>Client</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recentProjectsBody">
+                  <tr>
+                    <td colspan="5" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Sales Performance (Hidden by default, shown for Sales employees) -->
+          <div id="salesPerformanceSection" class="card d-none" style="margin-bottom: var(--space-6);">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-chart-line"></i> Monthly Sales Performance</h3>
+                <small class="text-muted">Your contribution this month</small>
+              </div>
+              <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <!-- Clients -->
+                    <div class="text-center">
+                        <h4 class="mb-2" style="font-size: 1rem; color: var(--text-secondary);">New Clients</h4>
+                        <div class="d-flex justify-content-center align-items-baseline mb-1">
+                            <span class="h2 font-weight-bold" style="color: var(--primary-color); font-size: 2rem;" id="myClients">0</span>
+                            <!-- <span class="text-muted mx-2">/</span> -->
+                            <!-- <span class="h4 text-muted" id="teamClients">0</span> -->
+                        </div>
+                        <!-- <small class="text-muted">My Actual / Team Target</small> -->
+                    </div>
+                    <!-- Meetings -->
+                    <div class="text-center" style="border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color);">
+                        <h4 class="mb-2" style="font-size: 1rem; color: var(--text-secondary);">Meetings</h4>
+                        <div class="d-flex justify-content-center align-items-baseline mb-1">
+                            <span class="h2 font-weight-bold" style="color: var(--info); font-size: 2rem;" id="myMeetings">0</span>
+                        </div>
+                    </div>
+                    <!-- Data -->
+                    <div class="text-center">
+                        <h4 class="mb-2" style="font-size: 1rem; color: var(--text-secondary);">Data Collection</h4>
+                        <div class="d-flex justify-content-center align-items-baseline mb-1">
+                            <span class="h2 font-weight-bold" style="color: var(--success); font-size: 2rem;" id="myData">0</span>
+                        </div>
+                    </div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <!-- SignalR Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/components.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+
+    <!-- Notification System -->
+    <script src="../../scripts/utils/notifications.js"></script>
+    <script src="../../scripts/components/notification-panel.js"></script>
+
+    <script src="../../scripts/pages/employee/dashboard.js"></script>
+  </body>
+</html>

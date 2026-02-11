@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Barq TMS</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient( 
+          135deg,
+          var(--darker-color) 0%,
+          var(--dark-color) 100%
+        );
+      }
+
+      .login-container {
+        width: 100%;
+        max-width: 450px;
+        padding: var(--space-6);
+      }
+
+      .login-card {
+        background: var(--dark-color);
+        border-radius: var(--radius-xl);
+        padding: var(--space-8);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: var(--space-8);
+      }
+
+      .login-logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto var(--space-4);
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+      }
+
+      .login-title {
+        font-size: var(--text-2xl);
+        margin-bottom: var(--space-2);
+        background: linear-gradient(
+          135deg,
+          var(--primary-light),
+          var(--accent-color)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .login-subtitle {
+        color: var(--text-secondary);
+        font-size: var(--text-sm);
+      }
+
+      .login-form {
+        margin-bottom: var(--space-6);
+      }
+
+      .form-group {
+        position: relative;
+        margin-bottom: var(--space-4);
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: var(--space-2);
+      }
+
+      .form-icon {
+        position: absolute;
+        left: var(--space-4);
+        top: calc(50% + 12px);
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: var(--text-lg);
+      }
+
+      .form-control-with-icon {
+        padding-left: calc(var(--space-4) * 3);
+      }
+
+      .login-footer {
+        text-align: center;
+        padding-top: var(--space-6);
+        border-top: 1px solid rgba(242, 240, 217, 0.1);
+        color: var(--text-secondary);
+        font-size: var(--text-sm);
+      }
+
+      .error-message {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--error);
+        color: var(--error);
+        padding: var(--space-3);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-4);
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo">
+            <i class="fa-solid fa-briefcase"></i>
+          </div>
+          <h1 class="login-title">Barq TMS</h1>
+          <p class="login-subtitle">Task Management System</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <span class="form-icon"><i class="fa-solid fa-user"></i></span>
+            <input
+              type="text"
+              class="form-control form-control-with-icon"
+              id="username"
+              name="username"
+              placeholder="Enter your username"
+              required
+              autocomplete="username"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <span class="form-icon"><i class="fa-solid fa-lock"></i></span>
+            <input
+              type="password"
+              class="form-control form-control-with-icon"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Sign In
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <p>&copy; 2025 Barq TMS. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+    <script src="../../scripts/pages/auth/login.js"></script>
+  </body>
+</html>

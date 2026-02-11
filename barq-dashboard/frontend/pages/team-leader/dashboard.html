@@ -1,0 +1,345 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Barq TMS</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i
+              class="fa-solid fa-briefcase"
+              style="font-size: 32px; color: white"
+            ></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text">Dashboard</span>
+            </a>
+            <a href="market-map.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-map-location-dot"></i
+              ></span>
+              <span class="nav-item-text">Market Map</span>
+            </a>
+            <a href="my-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-tasks"></i
+              ></span>
+              <span class="nav-item-text">My Tasks</span>
+            </a>
+            <a href="team-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users-gear"></i
+              ></span>
+              <span class="nav-item-text">Team Tasks</span>
+            </a>
+            <a href="team-members.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users"></i
+              ></span>
+              <span class="nav-item-text">Team Members</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-calendar"></i
+              ></span>
+              <span class="nav-item-text">Calendar</span>
+            </a>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">U</div>
+            <div>
+              <div class="sidebar-user-name">Loading...</div>
+              <div class="sidebar-user-role">Team Leader</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main">
+        <!-- Header -->
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="search-bar">
+              <span class="search-icon"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></span>
+              <input type="text" class="search-input" placeholder="Search..." />
+            </div>
+          </div>
+
+          <div class="header-right">
+            <button class="header-btn notification-btn">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+
+            <div class="user-menu">
+              <div class="user-avatar">U</div>
+              <span class="user-name">User Name</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content">
+          <!-- Page Header -->
+          <div style="margin-bottom: var(--space-6)">
+            <h2>Dashboard Overview</h2>
+             <p style="color: var(--text-secondary); margin: 0">
+              Welcome back! Here's what's happening today.
+            </p>
+          </div>
+
+          <!-- Weekly War Room (Strategy Board) -->
+          <div id="warRoomContainer" class="card" style="border: 1px solid var(--primary-color); border-left: 5px solid var(--primary-color); background: rgba(59, 130, 246, 0.05); display: none;">
+              <div class="card-body" style="padding: 20px;">
+                  <div style="display: flex; justify-content: space-between; align-items: start;">
+                      <div>
+                          <h4 style="margin: 0; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">
+                              <i class="fa-solid fa-chess-knight"></i> Weekly War Room
+                          </h4>
+                          <p id="warRoomText" style="margin-top: 10px; font-size: 1.2rem; font-weight: 500; color: var(--text-main);">
+                              Loading strategy...
+                          </p>
+                          <small class="text-muted" id="warRoomDate">Updated just now</small>
+                      </div>
+                      <button id="editStrategyBtn" class="btn btn-sm btn-secondary" onclick="openStrategyModal()">
+                          <i class="fa-solid fa-pen"></i> Edit
+                      </button>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Stats Cards Row -->
+          <div class="stats-row" id="statsRow">
+            <!-- Sales Targets (Hidden by default, shown via JS) -->
+            <div class="stat-card" id="cardClientsContainer" style="display: none;">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Clients Goal</span>
+                    <span class="stat-value" id="cardTargetClients">0</span>
+                </div>
+            </div>
+            
+            <div class="stat-card" id="cardMeetingsContainer" style="display: none;">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-handshake"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Meetings Goal</span>
+                    <span class="stat-value" id="cardTargetMeetings">0</span>
+                </div>
+            </div>
+
+            <div class="stat-card" id="cardDataContainer" style="display: none;">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Data Goal</span>
+                    <span class="stat-value" id="cardTargetData">0</span>
+                </div>
+            </div>
+
+            <!-- Standard Stats -->
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-list-check"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Tasks</span>
+                <span class="stat-value" id="totalTasks">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-folder-open"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Active Projects</span>
+                <span class="stat-value" id="totalProjects">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Team Members</span>
+                <span class="stat-value" id="totalEmployees">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Tasks Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Tasks</h3>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead id="recentTasksTableHead">
+                  <tr>
+                    <th>Task</th>
+                    <th>Project</th>
+                    <th>Assigned To</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                  </tr>
+                </thead>
+                <tbody id="recentTasksBody">
+                  <tr>
+                    <td colspan="6" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Projects Card -->
+          <div class="card" id="activeProjectsContainer">
+            <div class="card-header">
+              <h3>Active Projects</h3>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Project Name</th>
+                    <th>Client</th>
+                    <th>Tasks</th>
+                    <th>Duration</th>
+                  </tr>
+                </thead>
+                <tbody id="recentProjectsBody">
+                  <tr>
+                    <td colspan="4" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Targeted Segments (Created dynamically via JS for Sales Mode) -->
+          <div class="card d-none" id="targetedSegmentsContainer">
+              <div class="card-header">
+                  <h3><i class="fa-solid fa-map-location-dot"></i> Targeted Segments</h3>
+              </div>
+              <div class="card-body">
+                  <table class="table">
+                      <thead>
+                          <tr>
+                              <th>Zone/Place</th>
+                              <th>Category</th>
+                              <th>Status</th>
+                          </tr>
+                      </thead>
+                      <tbody id="targetedSegmentsBody">
+                          <!-- Content loaded via dashboard.js -->
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Strategy Modal -->
+    <div id="strategyModal" class="modal-backdrop d-none">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Update Weekly Strategy</h3>
+                    <button type="button" class="btn-icon" onclick="closeStrategyModal()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="strategyInput">War Room Message</label>
+                        <textarea id="strategyInput" class="form-control" rows="4" placeholder="e.g., Focus on Downtown Banks this week..."></textarea>
+                        <small>This message will be visible to all sales staff immediately.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeStrategyModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStrategy()">Update Board</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- SignalR Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/components.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+
+    <!-- Notification System -->
+    <script src="../../scripts/utils/notifications.js"></script>
+    <script src="../../scripts/components/notification-panel.js"></script>
+
+    <script src="../../scripts/pages/team-leader/dashboard.js?v=1.6"></script>
+  </body>
+</html>

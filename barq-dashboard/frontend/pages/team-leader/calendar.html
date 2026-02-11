@@ -1,0 +1,450 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendar - Barq TMS</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    
+    <style>
+      /* Custom Checkbox Styling for Attendees */
+      .custom-checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .custom-checkbox-item:hover {
+        background-color: rgba(255,255,255,0.05);
+      }
+      .custom-checkbox-item:last-child {
+        border-bottom: none;
+      }
+      
+      .styled-checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #666; /* Muted border */
+        border-radius: 4px;
+        background-color: transparent;
+        margin-right: 12px;
+        cursor: pointer;
+        position: relative;
+        flex-shrink: 0;
+      }
+      
+      .styled-checkbox:checked {
+        background-color: #8b5cf6; /* Primary Purple matches theme */
+        border-color: #8b5cf6;
+      }
+      
+      .styled-checkbox:checked::after {
+        content: '\2713'; /* Checkmark */
+        font-size: 14px;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+      }
+      
+      .checkbox-label {
+        font-size: 0.95rem;
+        color: #e2e8f0;
+        cursor: pointer;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i
+              class="fa-solid fa-briefcase"
+              style="font-size: 32px; color: white"
+            ></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text">Dashboard</span>
+            </a>
+            <a href="market-map.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-map-location-dot"></i
+              ></span>
+              <span class="nav-item-text">Market Map</span>
+            </a>
+            <a href="my-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-tasks"></i
+              ></span>
+              <span class="nav-item-text">My Tasks</span>
+            </a>
+            <a href="team-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users-gear"></i
+              ></span>
+              <span class="nav-item-text">Team Tasks</span>
+            </a>
+            <a href="team-members.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users"></i
+              ></span>
+              <span class="nav-item-text">Team Members</span>
+            </a>
+            <a href="calendar.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-calendar"></i
+              ></span>
+              <span class="nav-item-text">Calendar</span>
+            </a>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">U</div>
+            <div>
+              <div class="sidebar-user-name">Loading...</div>
+              <div class="sidebar-user-role">Team Leader</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main">
+        <!-- Header -->
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="search-bar">
+              <span class="search-icon"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></span>
+              <input
+                type="text"
+                class="search-input"
+                placeholder="Search tasks..."
+              />
+            </div>
+          </div>
+
+          <div class="header-right">
+            <button class="header-btn notification-btn">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+
+            <div class="user-menu">
+              <div class="user-avatar">U</div>
+              <span class="user-name">User Name</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content">
+          <!-- Page Header -->
+          <div
+            style="
+              margin-bottom: var(--space-6);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div>
+              <h2>Calendar</h2>
+              <p style="color: var(--text-secondary); margin: 0">
+                View and manage your schedule
+              </p>
+            </div>
+            <button class="btn btn-primary" onclick="showCreateEventModal()">
+              <i class="fa-solid fa-plus"></i> Add Event
+            </button>
+          </div>
+
+          <!-- Calendar Controls -->
+          <div class="card" style="margin-bottom: var(--space-6)">
+            <div
+              class="card-body"
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+              "
+            >
+              <!-- User Filter (Team Leader specific) -->
+              <div style="display: flex; gap: 10px; align-items: center;">
+                 <select id="calendarUserFilter" class="form-control" style="width: 200px; padding: 5px;" onchange="handleUserFilterChange()">
+                    <option value="">My Calendar</option>
+                 </select>
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: center;">
+                 <button class="btn btn-secondary" onclick="previousMonth()">
+
+                   <i class="fa-solid fa-chevron-left"></i> Previous
+                 </button>
+                 <h3 id="currentMonthYear" style="margin: 0; min-width: 180px; text-align: center;">Loading...</h3>
+                 <button class="btn btn-secondary" onclick="nextMonth()">
+                   Next <i class="fa-solid fa-chevron-right"></i>
+                 </button>
+              </div>
+
+              <!-- LEGEND -->
+              <div style="display: flex; gap: 15px; align-items: center; font-size: 0.9em;">
+                  <div style="display: flex; align-items: center; gap: 5px;">
+                      <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #3b82f6;"></span> Meeting
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 5px;">
+                      <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #ef4444;"></span> Deadline
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 5px;">
+                      <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #10b981;"></span> Task
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 5px;">
+                      <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #8b5cf6;"></span> Team Task
+                  </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calendar Grid -->
+          <div class="card">
+            <div class="card-body">
+              <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be rendered here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Upcoming Events -->
+          <div class="card" style="margin-top: var(--space-6)">
+            <div class="card-header">
+              <h3>Upcoming Tasks & Deadlines</h3>
+            </div>
+            <div class="card-body">
+              <div
+                id="upcomingEvents"
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: var(--space-3);
+                "
+              >
+                <!-- Events will be rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="eventModal" class="modal-backdrop d-none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Add Event</h3>
+            <button class="btn-icon" onclick="closeEventModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="eventForm">
+              <input type="hidden" id="eventId" />
+
+              <div class="form-group">
+                <label for="eventTitle">Title *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="eventTitle"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="eventDescription">Description</label>
+                <textarea
+                  class="form-control"
+                  id="eventDescription"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="eventDate">Date *</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="eventDate"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="eventTime">Time</label>
+                <input type="time" class="form-control" id="eventTime" />
+              </div>
+
+              <div class="form-group">
+                <label for="eventType">Type</label>
+                <select class="form-control" id="eventType">
+                  <option value="meeting">Meeting</option>
+                  <option value="deadline">Deadline</option>
+                  <option value="reminder">Reminder</option>
+                </select>
+              </div>
+              
+              <div class="form-group" id="attendeesGroup">
+                <label>Attendees</label>
+                <!-- Custom Dropdown Trigger -->
+                <button type="button" class="btn btn-secondary w-100" style="display: flex; justify-content: space-between; align-items: center; text-align: left; background-color: var(--surface-light); border: 1px solid rgba(255,255,255,0.1);" onclick="toggleAttendeesDropdown()">
+                    <span id="attendeesButtonText">Select Team Members</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <!-- Dropdown Content -->
+                <div id="attendeesDropdown" class="d-none" style="margin-top: 5px; background-color: #1e1e2d; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 0; margin: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.5); overflow: hidden;">
+                    <div id="attendeesList" style="max-height: 250px; overflow-y: auto;">
+                        <!-- Checkboxes injected by JS -->
+                        <div class="text-muted small p-2">Loading team members...</div>
+                    </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="closeEventModal()"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  Save Event
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Details Modal (Read Only View) -->
+    <div id="eventDetailsModal" class="modal-backdrop d-none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Event Details</h3>
+            <button class="btn-icon" onclick="closeEventDetailsModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+             <div id="eventDetailsContent">
+                 <!-- Populated by JS -->
+             </div>
+          </div>
+          <div class="modal-footer" style="justify-content: space-between;">
+             <div id="eventDetailsActions">
+                 <!-- Edit/Delete buttons injected here -->
+             </div>
+             <button class="btn btn-secondary" onclick="closeEventDetailsModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Details Modal (Read Only for basics) -->
+    <div id="taskDetailsModal" class="modal-backdrop d-none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Task Details</h3>
+            <button class="btn-icon" onclick="closeTaskDetailsModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="taskDetailsContent">
+              <!-- Content will be loaded dynamically -->
+              <div class="text-center" style="padding: 20px;">
+                <div class="spinner"></div>
+                <p>Loading details...</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer" style="justify-content: space-between;">
+            <div id="taskDetailsActions"></div>
+            <button class="btn btn-secondary" onclick="closeTaskDetailsModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Styles moved to components.css -->
+    <!-- SignalR Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/components.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+
+    <!-- Notification System -->
+    <script src="../../scripts/utils/notifications.js"></script>
+    <script src="../../scripts/components/notification-panel.js"></script>
+
+    <script src="../../scripts/pages/team-leader/calendar.js"></script>
+  </body>
+</html>

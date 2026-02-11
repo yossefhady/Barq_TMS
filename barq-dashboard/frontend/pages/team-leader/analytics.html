@@ -1,0 +1,296 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics - Barq TMS</title>
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i
+              class="fa-solid fa-briefcase"
+              style="font-size: 32px; color: white"
+            ></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text"
+                >Dashboard</span
+              >
+            </a>
+            <a href="team-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users-gear"></i
+              ></span>
+              <span class="nav-item-text"
+                >Team Tasks</span
+              >
+            </a>
+            <a href="team-members.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-users"></i
+              ></span>
+              <span class="nav-item-text"
+                >Team Members</span
+              >
+            </a>
+            <a href="projects.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-folder-open"></i
+              ></span>
+              <span class="nav-item-text"
+                >Projects</span
+              >
+            </a>
+            <a href="calendar.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-calendar"></i
+              ></span>
+              <span class="nav-item-text"
+                >Calendar</span
+              >
+            </a>
+            <a href="analytics.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-chart-line"></i
+              ></span>
+              <span class="nav-item-text"
+                >Analytics</span
+              >
+            </a>
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text"
+                >Settings</span
+              >
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">U</div>
+            <div>
+              <div class="sidebar-user-name">Loading...</div>
+              <div class="sidebar-user-role">Team Leader</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="search-bar">
+              <span class="search-icon"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></span>
+              <input
+                type="text"
+                class="search-input"
+                placeholder="Search..."
+              />
+            </div>
+          </div>
+          <div class="header-right">
+            <button class="header-btn notification-btn">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+            <div class="user-menu">
+              <div class="user-avatar">U</div>
+              <span class="user-name">User Name</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="content">
+          <div style="margin-bottom: var(--space-6)">
+            <h2>Analytics & Reports</h2>
+            <p style="color: var(--text-secondary); margin: 0">
+              View insights and performance metrics
+            </p>
+          </div>
+
+          <!-- Stats Overview -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <div
+                class="stat-icon"
+                style="background: linear-gradient(135deg, #10b981, #059669)"
+              >
+                <i class="fa-solid fa-check-circle"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label"
+                  >Completed Tasks</span
+                >
+                <span class="stat-value" id="completedTasks">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div
+                class="stat-icon"
+                style="background: linear-gradient(135deg, #f59e0b, #d97706)"
+              >
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label"
+                  >Pending Tasks</span
+                >
+                <span class="stat-value" id="pendingTasks">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div
+                class="stat-icon"
+                style="background: linear-gradient(135deg, #3b82f6, #2563eb)"
+              >
+                <i class="fa-solid fa-spinner"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">In Progress</span>
+                <span class="stat-value" id="inProgressTasks">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div
+                class="stat-icon"
+                style="background: linear-gradient(135deg, #ef4444, #dc2626)"
+              >
+                <i class="fa-solid fa-exclamation-triangle"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label"
+                  >Overdue Tasks</span
+                >
+                <span class="stat-value" id="overdueTasks">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Task Distribution -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Task Status Distribution</h3>
+            </div>
+            <div class="card-body">
+              <div
+                style="
+                  padding: 40px;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                "
+              >
+                <div style="max-width: 500px; width: 100%">
+                  <canvas id="taskDistributionChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project Budget Overview -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Project Budget Overview</h3>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Project Name</th>
+                    <th>Client</th>
+                    <th>Tasks</th>
+                    <th>Progress</th>
+                  </tr>
+                </thead>
+                <tbody id="budgetTableBody">
+                  <tr>
+                    <td colspan="4" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Team Performance -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Team Performance</h3>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Assigned Tasks</th>
+                    <th>Completed</th>
+                    <th>In Progress</th>
+                    <th>Completion Rate</th>
+                  </tr>
+                </thead>
+                <tbody id="performanceTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center" style="padding: 40px">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- SignalR Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/components.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+
+    <!-- Notification System -->
+    <script src="../../scripts/utils/notifications.js"></script>
+    <script src="../../scripts/components/notification-panel.js"></script>
+
+    <script src="../../scripts/pages/team-leader/analytics.js"></script>
+  </body>
+</html>

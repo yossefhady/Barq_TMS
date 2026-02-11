@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Client Details - Barq TMS</title>
+    <link rel="stylesheet" href="../../styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <i
+              class="fa-solid fa-briefcase"
+              style="font-size: 32px; color: white"
+            ></i>
+          </div>
+          <div class="sidebar-brand">
+            <h1>Barq TMS</h1>
+            <p>Task Management</p>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <a href="dashboard.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gauge"></i
+              ></span>
+              <span class="nav-item-text">Dashboard</span>
+            </a>
+            <a href="my-tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-tasks"></i
+              ></span>
+              <span class="nav-item-text">My Tasks</span>
+            </a>
+            <a href="tasks.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-list-check"></i
+              ></span>
+              <span class="nav-item-text">Task Reviews</span>
+            </a>
+            <a href="projects.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-folder-open"></i
+              ></span>
+              <span class="nav-item-text">Projects</span>
+            </a>
+            <a href="clients.html" class="nav-item active">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-handshake"></i
+              ></span>
+              <span class="nav-item-text">Clients</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-calendar-days"></i
+              ></span>
+              <span class="nav-item-text">Calendar</span>
+            </a>
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-gear"></i
+              ></span>
+              <span class="nav-item-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="auth.logout(); return false;">
+              <span class="nav-item-icon"
+                ><i class="fa-solid fa-right-from-bracket"></i
+              ></span>
+              <span class="nav-item-text">Logout</span>
+            </a>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">U</div>
+            <div>
+              <div class="sidebar-user-name">Loading...</div>
+              <div class="sidebar-user-role">Account Manager</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="breadcrumb">
+              <a href="clients.html" class="breadcrumb-link">
+                <i class="fa-solid fa-handshake"></i> Clients
+              </a>
+              <span class="breadcrumb-separator">/</span>
+              <span class="breadcrumb-current" id="clientNameBreadcrumb"
+                >Loading...</span
+              >
+            </div>
+          </div>
+          <div class="header-right">
+            <button class="header-btn notification-btn">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+            <div class="user-menu">
+              <div class="user-avatar">U</div>
+              <span class="user-name">User Name</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="content">
+          <!-- Loading State -->
+          <div id="loadingState" class="text-center" style="padding: 60px">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: var(--text-secondary)">
+              Loading client details...
+            </p>
+          </div>
+
+          <!-- Client Details -->
+          <div id="clientDetailsContainer" class="d-none">
+            <!-- Header with Actions -->
+            <div class="page-header" style="margin-bottom: var(--space-6)">
+              <div>
+                <h2 id="clientName">Client Name</h2>
+                <p
+                  style="color: var(--text-secondary); margin: 0"
+                  id="clientSubtitle"
+                >
+                  Client information and project overview
+                </p>
+              </div>
+              <div style="display: flex; gap: 12px">
+                <button
+                  class="btn btn-secondary"
+                  onclick="window.location.href='clients.html'"
+                >
+                  <i class="fa-solid fa-arrow-left"></i> Back to Clients
+                </button>
+                <button class="btn btn-primary" onclick="showContractModal()">
+                  <i class="fa-solid fa-file-contract"></i> Send Contract
+                </button>
+              </div>
+            </div>
+
+            <!-- Client Information Card -->
+            <div class="card" style="margin-bottom: var(--space-6)">
+              <div class="card-header">
+                <h3>
+                  <i class="fa-solid fa-info-circle"></i> Client Information
+                </h3>
+              </div>
+              <div class="card-body">
+                <div
+                  class="details-grid"
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: var(--space-6);
+                  "
+                >
+                  <div class="detail-item">
+                    <label class="detail-label"
+                      ><i class="fa-solid fa-id-card"></i> Client ID</label
+                    >
+                    <div class="detail-value" id="clientId">-</div>
+                  </div>
+                  <div class="detail-item">
+                    <label class="detail-label"
+                      ><i class="fa-solid fa-user"></i> Client Name</label
+                    >
+                    <div class="detail-value" id="clientNameDetail">-</div>
+                  </div>
+                  <div class="detail-item">
+                    <label class="detail-label"
+                      ><i class="fa-solid fa-envelope"></i> Email</label
+                    >
+                    <div class="detail-value" id="clientEmail">-</div>
+                  </div>
+                  <div class="detail-item">
+                    <label class="detail-label"
+                      ><i class="fa-solid fa-phone"></i> Phone Number</label
+                    >
+                    <div class="detail-value" id="clientPhone">-</div>
+                  </div>
+                  <div class="detail-item">
+                    <label class="detail-label"
+                      ><i class="fa-solid fa-building"></i> Company</label
+                    >
+                    <div class="detail-value" id="clientCompany">-</div>
+                  </div>
+                  <div class="detail-item">
+                    <label class="detail-label"
+                      ><i class="fa-solid fa-location-dot"></i> Address</label
+                    >
+                    <div class="detail-value" id="clientAddress">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Statistics Row -->
+            <div class="stats-row" style="margin-bottom: var(--space-6)">
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">Total Projects</span>
+                  <span class="stat-value" id="totalProjects">0</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fa-solid fa-list-check"></i>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">Total Tasks</span>
+                  <span class="stat-value" id="totalTasks">0</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">Completed Tasks</span>
+                  <span class="stat-value" id="completedTasks">0</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">Pending Tasks</span>
+                  <span class="stat-value" id="pendingTasks">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Client Projects -->
+            <div class="card" style="margin-bottom: var(--space-6)">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-folder-open"></i> Client Projects</h3>
+              </div>
+              <div class="card-body">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Project Name</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Status</th>
+                      <th>Tasks</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="projectsBody">
+                    <tr>
+                      <td colspan="6" class="text-center" style="padding: 40px">
+                        <div class="spinner"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Task Calendar -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-calendar-days"></i> Task Calendar</h3>
+              </div>
+              <div class="card-body">
+                <!-- Calendar Controls -->
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: var(--space-4);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary btn-sm"
+                    onclick="previousMonth()"
+                  >
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                  </button>
+                  <h4 id="currentMonthYear" style="margin: 0">Loading...</h4>
+                  <button
+                    class="btn btn-secondary btn-sm"
+                    onclick="nextMonth()"
+                  >
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                  </button>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="calendar-grid" id="calendarGrid">
+                  <!-- Calendar will be rendered here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming Tasks -->
+            <div class="card" style="margin-top: var(--space-6)">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-clock"></i> Upcoming Tasks</h3>
+              </div>
+              <div class="card-body">
+                <div
+                  id="upcomingTasks"
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--space-3);
+                  "
+                >
+                  <div class="text-center" style="padding: 40px">
+                    <div class="spinner"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error State -->
+          <div id="errorState" class="d-none text-center" style="padding: 60px">
+            <i
+              class="fa-solid fa-exclamation-triangle"
+              style="font-size: 48px; color: var(--danger); margin-bottom: 20px"
+            ></i>
+            <h3>Client Not Found</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px">
+              The client you're looking for doesn't exist or has been removed.
+            </p>
+            <button
+              class="btn btn-primary"
+              onclick="window.location.href='clients.html'"
+            >
+              <i class="fa-solid fa-arrow-left"></i> Back to Clients
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Send Contract Modal -->
+    <div id="contractModal" class="modal-backdrop d-none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-file-contract"></i> Send Contract</h3>
+            <button class="btn-icon" onclick="closeContractModal()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="contractForm">
+              <div class="form-group">
+                <label for="contractTitle">Contract Title *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="contractTitle"
+                  placeholder="e.g., Service Agreement 2025"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="contractDescription">Description</label>
+                <textarea
+                  class="form-control"
+                  id="contractDescription"
+                  rows="3"
+                  placeholder="Add any notes or description for this contract..."
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="contractFiles">Upload PDF Files *</label>
+                <div
+                  id="dropZone"
+                  class="file-drop-zone"
+                  style="
+                    border: 2px dashed var(--border);
+                    border-radius: var(--radius-lg);
+                    padding: var(--space-8);
+                    text-align: center;
+                    cursor: pointer;
+                    transition: var(--transition-fast);
+                    background: var(--surface-secondary);
+                  "
+                >
+                  <i
+                    class="fa-solid fa-cloud-arrow-up"
+                    style="
+                      font-size: 48px;
+                      color: var(--primary-color);
+                      margin-bottom: var(--space-3);
+                    "
+                  ></i>
+                  <p
+                    style="margin: 0; color: var(--text-main); font-weight: 600"
+                  >
+                    Drop PDF files here or click to browse
+                  </p>
+                  <p
+                    style="
+                      margin: var(--space-2) 0 0 0;
+                      color: var(--text-secondary);
+                      font-size: var(--text-sm);
+                    "
+                  >
+                    Only PDF files are accepted
+                  </p>
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="contractFiles"
+                    accept=".pdf"
+                    multiple
+                    style="display: none"
+                  />
+                </div>
+                <div
+                  id="fileList"
+                  style="
+                    margin-top: var(--space-4);
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--space-2);
+                  "
+                ></div>
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="closeContractModal()"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fa-solid fa-paper-plane"></i> Send Contract
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SignalR Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+    <script src="../../scripts/utils/utils.js"></script>
+    <script src="../../scripts/utils/components.js"></script>
+    <script src="../../scripts/utils/api.js"></script>
+    <script src="../../scripts/utils/auth.js"></script>
+
+    <!-- Notification System -->
+    <script src="../../scripts/utils/notifications.js"></script>
+    <script src="../../scripts/components/notification-panel.js"></script>
+
+    <script src="../../scripts/pages/account-manager/client-details.js"></script>
+  </body>
+</html>

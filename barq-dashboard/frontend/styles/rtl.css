@@ -1,0 +1,664 @@
+/* RTL (Right-to-Left) Support for Arabic and other RTL languages */
+
+/* Root RTL Direction */
+html[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] body {
+  text-align: right;
+}
+
+/* Sidebar RTL Adjustments */
+html[dir="rtl"] .sidebar {
+  left: auto;
+  right: 0;
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+}
+
+html[dir="rtl"] .main,
+html[dir="rtl"] .main-content {
+  margin-left: 0;
+  margin-right: 280px;
+}
+
+html[dir="rtl"] .sidebar-header {
+  text-align: right;
+}
+
+html[dir="rtl"] .nav-item {
+  padding: 12px 24px 12px 16px;
+}
+
+html[dir="rtl"] .nav-item-icon {
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+html[dir="rtl"] .nav-section-title {
+  padding: 8px 24px 8px 16px;
+}
+
+/* Header RTL Adjustments */
+html[dir="rtl"] .header {
+  padding: 0 280px 0 0;
+}
+
+html[dir="rtl"] .header-left {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+html[dir="rtl"] .header-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+html[dir="rtl"] .search-bar input {
+  padding: 0 40px 0 16px;
+  text-align: right;
+}
+
+html[dir="rtl"] .search-bar i {
+  left: auto;
+  right: 12px;
+}
+
+/* Notification Panel RTL */
+html[dir="rtl"] .notification-panel {
+  left: 0;
+  right: auto;
+}
+
+html[dir="rtl"] .notification-item {
+  text-align: right;
+}
+
+html[dir="rtl"] .notification-icon {
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+html[dir="rtl"] .notification-actions {
+  justify-content: flex-start;
+}
+
+html[dir="rtl"] .notification-time {
+  text-align: left;
+}
+
+/* User Menu RTL */
+html[dir="rtl"] .user-menu {
+  left: 0;
+  right: auto;
+}
+
+html[dir="rtl"] .user-menu a i {
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+/* Breadcrumb RTL */
+html[dir="rtl"] .breadcrumb {
+  direction: rtl;
+}
+
+html[dir="rtl"] .breadcrumb-item::after {
+  content: "\\";
+  margin: 0 8px 0 0;
+}
+
+html[dir="rtl"] .breadcrumb-item:last-child::after {
+  display: none;
+}
+
+/* Cards RTL */
+html[dir="rtl"] .card-icon {
+  margin-right: 0;
+  margin-left: 16px;
+}
+
+html[dir="rtl"] .stat-card-icon {
+  right: auto;
+  left: 20px;
+}
+
+/* Tables RTL */
+html[dir="rtl"] .table {
+  text-align: right;
+}
+
+html[dir="rtl"] .table th:first-child,
+html[dir="rtl"] .table td:first-child {
+  text-align: right;
+}
+
+html[dir="rtl"] .table-actions {
+  text-align: left;
+}
+
+/* Forms RTL */
+html[dir="rtl"] .form-group label {
+  text-align: right;
+}
+
+html[dir="rtl"] .form-control,
+html[dir="rtl"] .form-select,
+html[dir="rtl"] .form-textarea {
+  text-align: right;
+  direction: rtl;
+}
+
+html[dir="rtl"] .form-icon {
+  left: auto;
+  right: 12px;
+}
+
+html[dir="rtl"] .form-control-icon {
+  padding-right: 40px;
+  padding-left: 12px;
+}
+
+html[dir="rtl"] .checkbox-label,
+html[dir="rtl"] .radio-label {
+  padding-left: 0;
+  padding-right: 28px;
+}
+
+html[dir="rtl"] .checkbox-label::before,
+html[dir="rtl"] .radio-label::before {
+  left: auto;
+  right: 0;
+}
+
+/* Buttons RTL */
+html[dir="rtl"] .btn i {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+html[dir="rtl"] .btn i:first-child {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+html[dir="rtl"] .btn-group {
+  flex-direction: row-reverse;
+}
+
+/* Modals RTL */
+html[dir="rtl"] .modal-header {
+  text-align: right;
+}
+
+html[dir="rtl"] .modal-close {
+  left: 20px;
+  right: auto;
+}
+
+html[dir="rtl"] .modal-footer {
+  justify-content: flex-start;
+}
+
+/* Tabs RTL */
+html[dir="rtl"] .tabs {
+  direction: rtl;
+}
+
+html[dir="rtl"] .tab-item {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+/* Dropdowns RTL */
+html[dir="rtl"] .dropdown-menu {
+  left: 0;
+  right: auto;
+  text-align: right;
+}
+
+html[dir="rtl"] .dropdown-item i {
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+/* Badges RTL */
+html[dir="rtl"] .badge {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+/* Pagination RTL */
+html[dir="rtl"] .pagination {
+  flex-direction: row-reverse;
+}
+
+/* Tooltips RTL */
+html[dir="rtl"] .tooltip {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Progress Bars RTL */
+html[dir="rtl"] .progress-bar {
+  direction: ltr; /* Keep progress direction left-to-right */
+}
+
+/* Charts - Keep LTR for data visualization */
+html[dir="rtl"] .chart-container {
+  direction: ltr;
+}
+
+/* Lists RTL */
+html[dir="rtl"] ul,
+html[dir="rtl"] ol {
+  padding-right: 20px;
+  padding-left: 0;
+}
+
+/* Activity Timeline RTL */
+html[dir="rtl"] .activity-timeline {
+  direction: rtl;
+}
+
+html[dir="rtl"] .activity-item::before {
+  right: -7px;
+  left: auto;
+}
+
+html[dir="rtl"] .activity-item {
+  padding-right: 24px;
+  padding-left: 0;
+  border-right: 2px solid var(--border-color);
+  border-left: none;
+}
+
+/* File Upload RTL */
+html[dir="rtl"] .file-upload-zone {
+  text-align: right;
+}
+
+/* Task Board RTL */
+html[dir="rtl"] .task-board {
+  direction: rtl;
+}
+
+html[dir="rtl"] .task-column {
+  margin-left: 0;
+  margin-right: 16px;
+}
+
+html[dir="rtl"] .task-column:last-child {
+  margin-right: 0;
+}
+
+/* Calendar RTL */
+html[dir="rtl"] .calendar {
+  direction: rtl;
+}
+
+html[dir="rtl"] .calendar-header {
+  direction: rtl;
+}
+
+html[dir="rtl"] .calendar-grid {
+  direction: rtl;
+}
+
+/* Stats RTL */
+html[dir="rtl"] .stat-trend {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+html[dir="rtl"] .stat-trend i {
+  margin-right: 0;
+  margin-left: 4px;
+}
+
+/* Filters RTL */
+html[dir="rtl"] .filters {
+  text-align: right;
+}
+
+html[dir="rtl"] .filter-item {
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+/* Language Switcher */
+.language-switcher {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.language-switcher-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: var(--bg-primary);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  min-width: 150px;
+  z-index: 1000;
+  display: none;
+}
+
+.language-switcher-dropdown.show {
+  display: block;
+}
+
+.language-option {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.language-option:hover {
+  background-color: var(--bg-secondary);
+}
+
+.language-option.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+.language-option i {
+  font-size: 16px;
+}
+
+html[dir="rtl"] .language-switcher-dropdown {
+  left: 0;
+  right: auto;
+}
+
+/* Notification Toast RTL */
+html[dir="rtl"] .notification-toast {
+  right: auto;
+  left: 20px;
+}
+
+html[dir="rtl"] .toast-close {
+  right: auto;
+  left: 8px;
+}
+
+html[dir="rtl"] .toast-icon {
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+/* Flex Direction Utilities */
+html[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .items-start {
+  align-items: flex-end;
+}
+
+html[dir="rtl"] .items-end {
+  align-items: flex-start;
+}
+
+html[dir="rtl"] .justify-start {
+  justify-content: flex-end;
+}
+
+html[dir="rtl"] .justify-end {
+  justify-content: flex-start;
+}
+
+/* Text Alignment Utilities */
+html[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+html[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* Spacing Utilities RTL */
+html[dir="rtl"] .mr-1 {
+  margin-right: 0;
+  margin-left: 4px;
+}
+html[dir="rtl"] .mr-2 {
+  margin-right: 0;
+  margin-left: 8px;
+}
+html[dir="rtl"] .mr-3 {
+  margin-right: 0;
+  margin-left: 12px;
+}
+html[dir="rtl"] .mr-4 {
+  margin-right: 0;
+  margin-left: 16px;
+}
+html[dir="rtl"] .mr-5 {
+  margin-right: 0;
+  margin-left: 20px;
+}
+
+html[dir="rtl"] .ml-1 {
+  margin-left: 0;
+  margin-right: 4px;
+}
+html[dir="rtl"] .ml-2 {
+  margin-left: 0;
+  margin-right: 8px;
+}
+html[dir="rtl"] .ml-3 {
+  margin-left: 0;
+  margin-right: 12px;
+}
+html[dir="rtl"] .ml-4 {
+  margin-left: 0;
+  margin-right: 16px;
+}
+html[dir="rtl"] .ml-5 {
+  margin-left: 0;
+  margin-right: 20px;
+}
+
+html[dir="rtl"] .pr-1 {
+  padding-right: 0;
+  padding-left: 4px;
+}
+html[dir="rtl"] .pr-2 {
+  padding-right: 0;
+  padding-left: 8px;
+}
+html[dir="rtl"] .pr-3 {
+  padding-right: 0;
+  padding-left: 12px;
+}
+html[dir="rtl"] .pr-4 {
+  padding-right: 0;
+  padding-left: 16px;
+}
+html[dir="rtl"] .pr-5 {
+  padding-right: 0;
+  padding-left: 20px;
+}
+
+html[dir="rtl"] .pl-1 {
+  padding-left: 0;
+  padding-right: 4px;
+}
+html[dir="rtl"] .pl-2 {
+  padding-left: 0;
+  padding-right: 8px;
+}
+html[dir="rtl"] .pl-3 {
+  padding-left: 0;
+  padding-right: 12px;
+}
+html[dir="rtl"] .pl-4 {
+  padding-left: 0;
+  padding-right: 16px;
+}
+html[dir="rtl"] .pl-5 {
+  padding-left: 0;
+  padding-right: 20px;
+}
+
+/* Border Radius RTL */
+html[dir="rtl"] .rounded-left {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+
+html[dir="rtl"] .rounded-right {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
+/* Animations - Keep same for both directions */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+html[dir="rtl"] .slide-in-right {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+html[dir="rtl"] .slide-in-left {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Font Adjustments for Arabic */
+html[lang="ar"] {
+  font-family: "Segoe UI", "Cairo", "Tajawal", "Almarai", sans-serif;
+}
+
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4,
+html[lang="ar"] h5,
+html[lang="ar"] h6 {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+html[lang="ar"] .sidebar-brand h1 {
+  font-size: 22px;
+}
+
+/* Numbers in Arabic - Keep LTR for consistency */
+html[lang="ar"] .number,
+html[lang="ar"] .stat-value,
+html[lang="ar"] .badge,
+html[lang="ar"] .price,
+html[lang="ar"] .amount {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Stats Cards RTL */
+html[dir="rtl"] .stat-card {
+  text-align: right;
+}
+
+html[dir="rtl"] .stat-icon {
+  margin-right: 0;
+  margin-left: 16px;
+  order: 2;
+}
+
+html[dir="rtl"] .stat-info {
+  order: 1;
+}
+
+html[dir="rtl"] .stats-row {
+  direction: rtl;
+}
+
+/* Search Bar RTL */
+html[dir="rtl"] .search-bar {
+  direction: rtl;
+}
+
+html[dir="rtl"] .search-input {
+  padding-right: 40px;
+  padding-left: 16px;
+  text-align: right;
+  direction: rtl;
+}
+
+html[dir="rtl"] .search-icon {
+  left: auto;
+  right: 12px;
+}
+
+/* Card Header RTL */
+html[dir="rtl"] .card-header {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+/* Table RTL */
+html[dir="rtl"] .table {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] .table th,
+html[dir="rtl"] .table td {
+  text-align: right;
+}
+
+html[dir="rtl"] .table th:last-child,
+html[dir="rtl"] .table td:last-child {
+  text-align: left;
+}
+
+/* Menu Toggle RTL */
+html[dir="rtl"] .menu-toggle {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Content Area RTL */
+html[dir="rtl"] .content {
+  text-align: right;
+}
+
+/* User Menu RTL */
+html[dir="rtl"] .user-menu {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .user-avatar {
+  margin-left: 12px;
+  margin-right: 0;
+}
