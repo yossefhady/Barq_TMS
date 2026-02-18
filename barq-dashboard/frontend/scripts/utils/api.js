@@ -1,9 +1,9 @@
 // API Configuration
 const API_CONFIG = {
-  // Use relative path for production (same domain) or fallback to localhost for dev
-  BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? "http://localhost:5144/api" 
-    : "/api",
+  // Use localhost for local dev, or the production backend for all other hosts
+  BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? "http://localhost:5144/api"
+    : "https://barqtms-api.runasp.net/api",
   TOKEN_KEY: "auth_token",
   USER_KEY: "user_data",
 };
