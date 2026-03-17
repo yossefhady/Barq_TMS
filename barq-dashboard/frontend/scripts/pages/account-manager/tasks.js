@@ -49,12 +49,7 @@ async function loadTasks() {
       myProjects.map((p) => p.projectId || p.ProjectId)
     );
 
-    console.log(
-      "[Tasks] My projects:",
-      myProjects.length,
-      "Total tasks before filter:",
-      allTasks.length
-    );
+    // Filter
 
     // Filter tasks from my projects only
     tasks = allTasks
@@ -102,8 +97,6 @@ async function loadTasks() {
         ClientReviewDate:
           task.clientReviewDate || task.ClientReviewDate || null,
       }));
-
-    console.log("[Tasks] Filtered to my tasks:", tasks.length);
 
     updateStats();
     renderTasks();
@@ -279,14 +272,14 @@ function renderTasks() {
       return `
         <tr>
           <td>
-            <strong>${task.Title}</strong>
+            <strong>${utils.escapeHtml(task.Title)}</strong>
             <div style="font-size: var(--text-sm); color: var(--text-secondary);">
-              <span class="badge ${priorityClass}">${task.Priority}</span>
+              <span class="badge ${priorityClass}">${utils.escapeHtml(task.Priority)}</span>
             </div>
           </td>
-          <td>${task.ProjectName}</td>
-          <td>${task.ClientName}</td>
-          <td>${task.AssignedToName}</td>
+          <td>${utils.escapeHtml(task.ProjectName)}</td>
+          <td>${utils.escapeHtml(task.ClientName)}</td>
+          <td>${utils.escapeHtml(task.AssignedToName)}</td>
           <td>${dueDate}</td>
           <td>${statusBadge}</td>
           <td>
@@ -354,7 +347,7 @@ function renderTaskDetailsInModal(task, comments) {
     <div class="details-grid" style="margin-bottom: var(--space-4);">
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-heading"></i> Task Title</label>
-        <div class="detail-value">${task.title || task.Title}</div>
+        <div class="detail-value">${utils.escapeHtml(task.title || task.Title)}</div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-calendar"></i> Due Date</label>
@@ -363,20 +356,20 @@ function renderTaskDetailsInModal(task, comments) {
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-user"></i> Assigned To</label>
         <div class="detail-value">${
-          task.assignedToName || task.AssignedToName || "Unassigned"
+          utils.escapeHtml(task.assignedToName || task.AssignedToName || "Unassigned")
         }</div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-flag"></i> Priority</label>
         <div class="detail-value"><span class="badge ${getPriorityClass(
           task.priority || task.Priority
-        )}">${task.priority || task.Priority}</span></div>
+        )}">${utils.escapeHtml(task.priority || task.Priority)}</span></div>
       </div>
     </div>
     <div class="detail-item" style="margin-bottom: var(--space-4);">
       <label class="detail-label"><i class="fa-solid fa-align-left"></i> Description</label>
       <div class="detail-value">${
-        task.description || task.Description || "No description"
+        utils.escapeHtml(task.description || task.Description || "No description")
       }</div>
     </div>
     ${
@@ -390,12 +383,12 @@ function renderTaskDetailsInModal(task, comments) {
               (c) => `
             <div style="padding: var(--space-3); background: var(--surface-secondary); border-radius: var(--radius-md); border-left: 3px solid var(--primary-color);">
               <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
-                <strong>${c.userName || c.UserName || "User"}</strong>
+                <strong>${utils.escapeHtml(c.userName || c.UserName || "User")}</strong>
                 <span style="font-size: var(--text-sm); color: var(--text-secondary);">${new Date(
                   c.createdAt || c.CreatedAt
                 ).toLocaleString()}</span>
               </div>
-              <p style="margin: 0;">${c.comment || c.Comment}</p>
+              <p style="margin: 0;">${utils.escapeHtml(c.comment || c.Comment)}</p>
             </div>
           `
             )
@@ -450,10 +443,6 @@ async function approveAndSendToClient() {
     // PLACEHOLDER: Notify client user
     // NOTE: Requires backend endpoint to get client user ID from project/client
     // await notifyClientUser(currentTaskForReview.ClientId, currentTaskForReview.TaskId);
-    console.log(
-      "[PLACEHOLDER] Should notify client user for task:",
-      currentTaskForReview.TaskId
-    );
 
     // Notify team leader that task was approved
     if (currentTaskForReview.AssignedToId) {
@@ -656,7 +645,7 @@ function updateFileList() {
     <div class="file-item" style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-2); background: var(--surface-secondary); border-radius: var(--radius-sm); margin-bottom: var(--space-2);">
       <div>
         <i class="fa-solid fa-file"></i>
-        <span>${file.name}</span>
+        <span>${utils.escapeHtml(file.name)}</span>
         <span class="text-secondary" style="font-size: var(--text-sm);"> (${formatFileSize(
           file.size
         )})</span>
@@ -698,7 +687,6 @@ async function uploadTaskFiles() {
       formData.append("file", file);
 
       await API.Files.upload(currentTaskForReview.TaskId, formData);
-      console.log(`Uploaded: ${file.name}`);
     }
 
     utils.showSuccess(`${selectedFiles.length} file(s) uploaded successfully`);
@@ -731,14 +719,7 @@ async function uploadTaskFiles() {
  * USAGE: To notify client when task is ready for review
  */
 async function getClientUserId(clientId, projectId) {
-  console.warn("[PLACEHOLDER] getClientUserId - Backend endpoint needed");
-  console.log("Need endpoint: GET /api/Clients/" + clientId + "/users");
-
-  // WORKAROUND: Return null for now
-  // When backend is ready, implement:
-  // const clientUsers = await API.Clients.getUsers(clientId);
-  // return clientUsers.find(u => u.role === 'ClientAdmin')?.userId;
-
+  // TODO: Implement when GET /api/Clients/{id}/users is available
   return null;
 }
 
@@ -752,21 +733,14 @@ async function getClientUserId(clientId, projectId) {
  * USAGE: Called when account manager approves task
  */
 async function notifyClientUser(clientId, taskId) {
-  console.warn(
-    "[PLACEHOLDER] notifyClientUser - Requires client user association"
-  );
-
   const clientUserId = await getClientUserId(clientId);
-
   if (!clientUserId) {
-    console.log("[PLACEHOLDER] No client user ID found, skipping notification");
     return;
   }
-
-  // When backend is ready:
+  // TODO: When backend is ready:
   // await API.Notifications.create({
   //   UserId: clientUserId,
-  //   Message: `Task ready for your review: ${taskTitle}`,
+  //   Message: `Task ready for your review`,
   //   TaskId: taskId
   // });
 }
@@ -782,12 +756,7 @@ async function notifyClientUser(clientId, taskId) {
  * CURRENT WORKAROUND: Team leader can update status manually
  */
 async function submitTaskForReview(taskId, notes) {
-  console.warn(
-    "[PLACEHOLDER] submitTaskForReview - Should be in Team Leader page"
-  );
-  console.log("Need endpoint: PUT /api/Tasks/" + taskId + "/submit-for-review");
-
-  // WORKAROUND:
+  // TODO: Replace with PUT /api/Tasks/{id}/submit-for-review when available
   await API.Tasks.update(taskId, {
     StatusId: TASK_STATUS.PENDING_AM_REVIEW,
     SubmittedForReview: true,
@@ -812,15 +781,7 @@ async function submitTaskForReview(taskId, notes) {
  * USAGE: Called from client portal (not account manager page)
  */
 async function clientApproveTask(taskId, notes, clientUserId) {
-  console.warn("[PLACEHOLDER] clientApproveTask - Requires client portal");
-  console.log("Need endpoint: PUT /api/Tasks/" + taskId + "/client-approve");
-
-  // When backend is ready:
-  // await API.Tasks.clientApprove(taskId, {
-  //   notes: notes,
-  //   clientUserId: clientUserId,
-  //   approved: true
-  // });
+  // TODO: Implement when PUT /api/Tasks/{id}/client-approve is available
 }
 
 /**
@@ -836,13 +797,5 @@ async function clientApproveTask(taskId, notes, clientUserId) {
  * USAGE: Called from client portal (not account manager page)
  */
 async function clientRejectTask(taskId, feedback, clientUserId) {
-  console.warn("[PLACEHOLDER] clientRejectTask - Requires client portal");
-  console.log("Need endpoint: PUT /api/Tasks/" + taskId + "/client-reject");
-
-  // When backend is ready:
-  // await API.Tasks.clientReject(taskId, {
-  //   feedback: feedback,
-  //   clientUserId: clientUserId,
-  //   approved: false
-  // });
+  // TODO: Implement when PUT /api/Tasks/{id}/client-reject is available
 }

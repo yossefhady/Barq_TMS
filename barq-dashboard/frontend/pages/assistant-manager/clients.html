@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -28,70 +28,42 @@
         <nav class="sidebar-nav">
           <div class="nav-section">
             <a href="dashboard.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-gauge"></i
-              ></span>
-              <span class="nav-item-text"
-                >Dashboard</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-gauge"></i></span>
+              <span class="nav-item-text">Dashboard</span>
             </a>
             <a href="tasks.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-list-check"></i
-              ></span>
+              <span class="nav-item-icon"><i class="fa-solid fa-list-check"></i></span>
               <span class="nav-item-text">Tasks</span>
             </a>
             <a href="projects.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-folder-open"></i
-              ></span>
-              <span class="nav-item-text"
-                >Projects</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-folder-open"></i></span>
+              <span class="nav-item-text">Projects</span>
             </a>
             <a href="clients.html" class="nav-item active">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-handshake"></i
-              ></span>
+              <span class="nav-item-icon"><i class="fa-solid fa-handshake"></i></span>
               <span class="nav-item-text">Clients</span>
             </a>
             <a href="targets.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-bullseye"></i
-              ></span>
+              <span class="nav-item-icon"><i class="fa-solid fa-bullseye"></i></span>
               <span class="nav-item-text">Sales Targets</span>
             </a>
             <a href="calendar.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-calendar"></i
-              ></span>
-              <span class="nav-item-text"
-                >Calendar</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-calendar"></i></span>
+              <span class="nav-item-text">Calendar</span>
             </a>
             <a href="analytics.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-chart-line"></i
-              ></span>
-              <span class="nav-item-text"
-                >Analytics</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-chart-line"></i></span>
+              <span class="nav-item-text">Analytics</span>
             </a>
           </div>
           <div class="nav-section">
             <div class="nav-section-title">Settings</div>
             <a href="settings.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-gear"></i
-              ></span>
-              <span class="nav-item-text"
-                >Settings</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-gear"></i></span>
+              <span class="nav-item-text">Settings</span>
             </a>
             <a href="#" class="nav-item" onclick="auth.logout(); return false;">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-right-from-bracket"></i
-              ></span>
+              <span class="nav-item-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
               <span class="nav-item-text">Logout</span>
             </a>
           </div>
@@ -114,9 +86,7 @@
               <i class="fa-solid fa-bars"></i>
             </button>
             <div class="search-bar">
-              <span class="search-icon"
-                ><i class="fa-solid fa-magnifying-glass"></i
-              ></span>
+              <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
               <input
                 type="text"
                 class="search-input"
@@ -148,24 +118,46 @@
           <div class="card">
             <div class="card-header">
               <h3>All Clients</h3>
-              <button class="btn btn-primary" onclick="showCreateModal()">
-                <i class="fa-solid fa-plus"></i> Add Client
-              </button>
+              <div class="table-actions-toolbar">
+                 <div class="filter-wrapper">
+                   <div class="filter-item">
+                     <i class="fa-solid fa-filter"></i>
+                     <select id="filterColumn" class="form-control">
+                       <option value="">Filter By...</option>
+                       <option value="Country">Country</option>
+                       <option value="AccountManagerName">Account Manager</option>
+                       <option value="OwnerName">Owner</option>
+                     </select>
+                   </div>
+                   <div class="filter-item">
+                     <i class="fa-solid fa-list-ul"></i>
+                     <select id="filterValue" class="form-control" disabled>
+                       <option value="">All</option>
+                     </select>
+                   </div>
+                 </div>
+                 <button class="btn btn-primary" onclick="showCreateModal()">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Add Client</span>
+                 </button>
+              </div>
             </div>
             <div class="card-body">
               <table class="table" id="clientsTable">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Client Name</th>
+                    <th>Company</th>
+                    <th>Owner</th>
+                    <th>Contact</th>
+                    <th>Country</th>
+                    <th>Account Manager</th>
                     <th>Projects</th>
-                    <th>Source</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="clientsBody">
                   <tr>
-                    <td colspan="5" class="text-center" style="padding: 40px">
+                    <td colspan="7" class="text-center" style="padding: 40px;">
                       <div class="spinner"></div>
                     </td>
                   </tr>
@@ -178,20 +170,44 @@
     </div>
 
     <!-- Create/Edit Client Modal -->
-    <div id="clientModal" class="modal-backdrop d-none">
+    <div id="clientModal" class="modal-backdrop d-none" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h3 id="modalTitle">Add Client</h3>
-            <button class="btn-icon" onclick="closeModal()">
+            <button class="btn-icon" onclick="closeModal()" aria-label="Close modal">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
           <div class="modal-body">
             <form id="clientForm">
               <input type="hidden" id="clientId" />
+
+              <!-- Owner Selection Type -->
+              <div class="form-group" id="ownerTypeGroup">
+                <label>Client Owner</label>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="radio" name="ownerType" value="new" checked onchange="toggleOwnerFields()">
+                    New User
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="radio" name="ownerType" value="existing" onchange="toggleOwnerFields()">
+                    Existing User
+                  </label>
+                </div>
+              </div>
+
+              <!-- Existing Owner Selection -->
+              <div class="form-group d-none" id="existingOwnerGroup">
+                <label for="existingOwner">Select Owner *</label>
+                <select class="form-control" id="existingOwner" name="existingOwner">
+                  <option value="">Select an existing client user...</option>
+                </select>
+              </div>
+
               <div class="form-group">
-                <label for="name">Name *</label>
+                <label for="name">Company Name *</label>
                 <input
                   type="text"
                   class="form-control"
@@ -210,28 +226,43 @@
                   required
                 />
               </div>
-              <div class="form-group" id="usernameGroup">
-                <label for="username">Username *</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="username"
-                  name="username"
-                  required
-                />
+
+              <!-- New User Credentials -->
+              <div id="newOwnerCredentials">
+                <div class="form-group">
+                  <label for="ownerName">Owner Name *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="ownerName"
+                    name="ownerName"
+                    required
+                  />
+                </div>
+                <div class="form-group" id="usernameGroup">
+                  <label for="username">Username *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="username"
+                    name="username"
+                    required
+                  />
+                </div>
+                <div class="form-group" id="passwordGroup">
+                  <label for="password">Password *</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    minlength="6"
+                    required
+                  />
+                  <small style="color: var(--text-secondary);">Minimum 6 characters</small>
+                </div>
               </div>
-              <div class="form-group" id="passwordGroup">
-                <label for="password">Password *</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="password"
-                  name="password"
-                  minlength="6"
-                  required
-                />
-                <small style="color: var(--text-secondary);">Minimum 6 characters</small>
-              </div>
+
               <div class="form-group">
                 <label for="phoneNumber">Phone Number</label>
                 <input
@@ -242,13 +273,10 @@
                 />
               </div>
               <div class="form-group">
-                <label for="company">Company</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="company"
-                  name="company"
-                />
+                <label for="country">Country</label>
+                <select class="form-control" id="country" name="country">
+                  <option value="">Select Country</option>
+                </select>
               </div>
               <div class="form-group">
                 <label for="address">Address</label>
@@ -283,9 +311,6 @@
       </div>
     </div>
 
-    <!-- SignalR Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
-
     <script src="../../scripts/utils/utils.js"></script>
     <script src="../../scripts/utils/components.js"></script>
     <script src="../../scripts/utils/api.js"></script>
@@ -295,6 +320,7 @@
     <script src="../../scripts/utils/notifications.js"></script>
     <script src="../../scripts/components/notification-panel.js"></script>
 
-    <script src="../../scripts/pages/assistant-manager/clients.js"></script>
+    <script>window.CLIENTS_PAGE_ROLES = [USER_ROLES.ASSISTANT_MANAGER];</script>
+    <script src="../../scripts/pages/shared/clients.js"></script>
   </body>
 </html>

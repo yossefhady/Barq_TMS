@@ -97,8 +97,8 @@ function renderProjects(projects) {
     .map(
       (project) => `
     <tr>
-      <td><strong>${project.ProjectName || "Untitled Project"}</strong></td>
-      <td>${project.ClientName || "N/A"}</td>
+      <td><strong>${utils.escapeHtml(project.ProjectName || "Untitled Project")}</strong></td>
+      <td>${utils.escapeHtml(project.ClientName || "N/A")}</td>
       <td>${utils.formatCurrency(project.Budget || 0)}</td>
       <td>${utils.formatDate(project.StartDate)}</td>
       <td>${utils.formatDate(project.EndDate)}</td>

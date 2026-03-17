@@ -13,9 +13,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const yearFilter = document.getElementById("filterYear");
   if(yearFilter) yearFilter.addEventListener("change", refreshData);
   
+  // Search handler
+  const searchInput = document.getElementById("searchInput");
+  if(searchInput) searchInput.addEventListener("input", handleSearch);
+
   // Initial Load
   await loadData();
 });
+
+function handleSearch(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  document.querySelectorAll("#targetsBody tr").forEach((row) => {
+    row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? "" : "none";
+  });
+}
 
 function setupFilters() {
     const now = new Date();
@@ -86,7 +97,7 @@ async function loadData() {
         
     } catch (err) {
         console.error("Error loading targets", err);
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Failed to load data: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Failed to load data: ${utils.escapeHtml(err.message)}</td></tr>`;
     } finally {
         utils.hideLoading();
     }
@@ -135,7 +146,7 @@ function renderRow(target, month, year) {
         <tr>
             <td style="vertical-align: middle;">
                 <div class="d-flex align-items-center">
-                    <div class="font-weight-bold" style="font-size: 1.1em;">${name}</div>
+                    <div class="font-weight-bold" style="font-size: 1.1em;">${utils.escapeHtml(name)}</div>
                 </div>
             </td>
             <td style="vertical-align: middle;">
@@ -197,7 +208,7 @@ window.openTargetModal = function(tlId) {
     // Set Title
     const title = document.getElementById("targetModalTitle");
     const name = targetData.TeamLeaderName || targetData.teamLeaderName || 'Unknown';
-    if(title) title.innerHTML = `Set Targets for <span class="text-primary">${name}</span>`;
+    if(title) title.innerHTML = `Set Targets for <span class="text-primary">${utils.escapeHtml(name)}</span>`;
     
     // Set Subtitle or Context info
     const info = document.getElementById("targetModalInfo");

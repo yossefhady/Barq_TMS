@@ -178,7 +178,6 @@
                     <th>Description</th>
                     <th>Company</th>
                     <th>Team Leaders</th>
-                    <th>Departments</th>
                     <th>Tasks</th>
                     <th>Start Date</th>
                     <th>End Date</th>
@@ -188,7 +187,7 @@
                 </thead>
                 <tbody id="projectsBody">
                   <tr>
-                    <td colspan="10" class="text-center" style="padding: 40px">
+                    <td colspan="9" class="text-center" style="padding: 40px;">
                       <div class="spinner"></div>
                     </td>
                   </tr>
@@ -233,8 +232,8 @@
                 ></textarea>
               </div>
               <div class="form-group">
-                <label for="clientId">Client</label>
-                <select class="form-control" id="clientId" name="clientId">
+                <label for="clientId">Client *</label>
+                <select class="form-control" id="clientId" name="clientId" required>
                   <option value="">Select Client</option>
                 </select>
               </div>
@@ -244,18 +243,6 @@
                   class="form-control"
                   id="teamLeaderId"
                   name="teamLeaderId"
-                  multiple
-                  size="3"
-                >
-                </select>
-                <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple</small>
-              </div>
-              <div class="form-group">
-                <label for="departmentId">Departments</label>
-                <select
-                  class="form-control"
-                  id="departmentId"
-                  name="departmentId"
                   multiple
                   size="3"
                 >

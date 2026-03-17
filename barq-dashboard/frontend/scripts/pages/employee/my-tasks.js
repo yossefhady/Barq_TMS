@@ -95,8 +95,8 @@ function renderTasks(tasks) {
     .map(
       (task) => `
     <tr>
-      <td><strong>${task.Title || "Untitled Task"}</strong></td>
-      <td>${isSales ? (task.SalesClientInfo || "-") : (task.ProjectName || "N/A")}</td>
+      <td><strong>${utils.escapeHtml(task.Title || "Untitled Task")}</strong></td>
+      <td>${isSales ? utils.escapeHtml(task.SalesClientInfo || "-") : utils.escapeHtml(task.ProjectName || "N/A")}</td>
       <td>${utils.getStatusBadge(task.StatusId !== undefined ? task.StatusId : 1)}</td>
       <td>${utils.getPriorityBadge(task.PriorityId !== undefined ? task.PriorityId : 1)}</td>
       <td>${utils.formatDate(task.DueDate)}</td>
@@ -152,17 +152,17 @@ async function viewTaskDetails(taskId) {
         <div class="details-grid" style="margin-bottom: var(--space-4);">
             <div class="detail-item">
               <label class="detail-label"><i class="fa-solid fa-heading"></i> Task Title</label>
-              <div class="detail-value">${task.Title || task.title}</div>
+              <div class="detail-value">${utils.escapeHtml(task.Title || task.title)}</div>
             </div>
             
             <div class="detail-item">
               <label class="detail-label"><i class="fa-solid fa-align-left"></i> Description</label>
-              <div class="detail-value" style="white-space: pre-wrap;">${task.Description || task.description || "No description"}</div>
+              <div class="detail-value" style="white-space: pre-wrap;">${utils.escapeHtml(task.Description || task.description || "No description")}</div>
             </div>
             
             <div class="detail-item">
               <label class="detail-label"><i class="fa-solid fa-user"></i> Assigned To</label>
-              <div class="detail-value">${task.AssignedToName || task.assignedToName || "Unassigned"}</div>
+              <div class="detail-value">${utils.escapeHtml(task.AssignedToName || task.assignedToName || "Unassigned")}</div>
             </div>
             <div class="detail-item">
               <label class="detail-label"><i class="fa-solid fa-flag"></i> Priority</label>
@@ -175,15 +175,15 @@ async function viewTaskDetails(taskId) {
           ${!isSales ? `
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-folder"></i> Project</label>
-            <div class="detail-value">${task.ProjectName || task.projectName || "No Project"}</div>
+            <div class="detail-value">${utils.escapeHtml(task.ProjectName || task.projectName || "No Project")}</div>
           </div>` : `
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-user-tie"></i> Client Info</label>
-            <div class="detail-value">${task.SalesClientInfo || "-"}</div>
+            <div class="detail-value">${utils.escapeHtml(task.SalesClientInfo || "-")}</div>
           </div>
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-location-dot"></i> Location</label>
-            <div class="detail-value">${task.SalesMarketSegmentPlace || task.salesMarketSegmentPlace || "-"}</div>
+            <div class="detail-value">${utils.escapeHtml(task.SalesMarketSegmentPlace || task.salesMarketSegmentPlace || "-")}</div>
           </div>
           <div class="detail-item">
               <label class="detail-label"><i class="fa-solid fa-list-check"></i> Activity Type</label>
@@ -197,7 +197,7 @@ async function viewTaskDetails(taskId) {
           `}
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-user-pen"></i> Created By</label>
-            <div class="detail-value">${task.CreatedByName || task.createdByName || "Unknown"}</div>
+            <div class="detail-value">${utils.escapeHtml(task.CreatedByName || task.createdByName || "Unknown")}</div>
           </div>
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-calendar"></i> Due Date</label>
@@ -242,7 +242,7 @@ async function viewTaskDetails(taskId) {
           <div class="detail-item" style="margin-bottom: 20px; display: block; margin-top: 20px;">
             <label class="detail-label"><i class="fa-solid fa-link"></i> Resources</label>
             <div class="detail-value">
-              <a href="${driveLink}" target="_blank" class="btn btn-primary" style="text-decoration: none; width: 100%; display: block; text-align: center;">
+              <a href="${utils.sanitizeUrl(driveLink)}" target="_blank" class="btn btn-primary" style="text-decoration: none; width: 100%; display: block; text-align: center;">
                 <i class="fa-brands fa-google-drive"></i> Open Task Folder
               </a>
             </div>
@@ -290,7 +290,7 @@ async function viewTaskDetails(taskId) {
       
   } catch (error) {
       console.error(error);
-      contentDiv.innerHTML = `<div class="alert alert-danger">Failed to load task details: ${error.message}</div>`;
+      contentDiv.innerHTML = `<div class="alert alert-danger">Failed to load task details: ${utils.escapeHtml(error.message)}</div>`;
   }
 }
 
@@ -314,10 +314,10 @@ async function loadTaskCommentsUnified(taskId) {
         container.innerHTML = sortedComments.map(c => `
              <div style="margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
                  <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="color: var(--primary-color); font-weight: 600;">${c.UserName || 'User'}</span>
+                    <span style="color: var(--primary-color); font-weight: 600;">${utils.escapeHtml(c.UserName || 'User')}</span>
                     <small style="color: var(--text-secondary);">${utils.formatDate(c.CreatedAt)}</small>
                  </div>
-                 <div style="color: var(--text-main); line-height: 1.4; white-space: pre-wrap;">${c.Comment}</div>
+                 <div style="color: var(--text-main); line-height: 1.4; white-space: pre-wrap;">${utils.escapeHtml(c.Comment)}</div>
              </div>
         `).join('');
         

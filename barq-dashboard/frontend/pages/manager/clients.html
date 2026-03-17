@@ -208,12 +208,12 @@
     </div>
 
     <!-- Create/Edit Client Modal -->
-    <div id="clientModal" class="modal-backdrop d-none">
+    <div id="clientModal" class="modal-backdrop d-none" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h3 id="modalTitle">Add Client</h3>
-            <button class="btn-icon" onclick="closeModal()">
+            <button class="btn-icon" onclick="closeModal()" aria-label="Close modal">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -350,9 +350,6 @@
       </div>
     </div>
 
-    <!-- SignalR Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
-
     <script src="../../scripts/utils/utils.js"></script>
     <script src="../../scripts/utils/components.js"></script>
     <script src="../../scripts/utils/api.js"></script>
@@ -362,6 +359,7 @@
     <script src="../../scripts/utils/notifications.js"></script>
     <script src="../../scripts/components/notification-panel.js"></script>
 
-    <script src="../../scripts/pages/manager/clients.js"></script>
+    <script>window.CLIENTS_PAGE_ROLES = [USER_ROLES.MANAGER];</script>
+    <script src="../../scripts/pages/shared/clients.js"></script>
   </body>
 </html>

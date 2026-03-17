@@ -5,7 +5,6 @@ let allProjects = []; // Store filtered data
 let projects = [];
 let clients = [];
 let teamLeaders = [];
-let departments = [];
 let currentEditId = null;
 let currentFilter = { column: "", value: "" };
 
@@ -46,9 +45,6 @@ async function loadData() {
             u.lastName || u.LastName || ""
           }`.trim(),
       }));
-
-    // Load all departments
-    departments = await API.Departments.getAll().catch(() => []);
 
     populateDropdowns();
     populateFilterDropdowns(); // Populate filter dropdowns
@@ -118,8 +114,8 @@ function populateFilterDropdowns() {
              } else if (column === 'StartDate' || column === 'EndDate') {
                  label = utils.formatDate(val);
              }
-             
-             optionsHtml += `<option value="${val}">${label}</option>`;
+
+             optionsHtml += `<option value="${utils.escapeHtml(val)}">${utils.escapeHtml(label)}</option>`;
         });
 
         filterValue.innerHTML = optionsHtml;
@@ -165,17 +161,12 @@ function populateDropdowns() {
   clientSelect.innerHTML =
     '<option value="">Select Client</option>' +
     clients
-      .map((c) => `<option value="${c.ClientId}">${c.ClientName}</option>`)
+      .map((c) => `<option value="${c.ClientId}">${utils.escapeHtml(c.ClientName)}</option>`)
       .join("");
 
   const teamLeaderSelect = document.getElementById("teamLeaderId");
   teamLeaderSelect.innerHTML = teamLeaders
-      .map((tl) => `<option value="${tl.UserId}">${tl.UserName}</option>`)
-      .join("");
-
-  const departmentSelect = document.getElementById("departmentId");
-  departmentSelect.innerHTML = departments
-      .map((d) => `<option value="${d.DeptId}">${d.DeptName}</option>`)
+      .map((tl) => `<option value="${tl.UserId}">${utils.escapeHtml(tl.UserName)}</option>`)
       .join("");
 }
 
@@ -211,24 +202,19 @@ function renderProjects() {
   tbody.innerHTML = projects
     .map(
       (project) => {
-        const teamLeaderNames = project.TeamLeaderNames && project.TeamLeaderNames.length > 0 
-          ? project.TeamLeaderNames.join(", ") 
+        const teamLeaderNames = project.TeamLeaderNames && project.TeamLeaderNames.length > 0
+          ? project.TeamLeaderNames.join(", ")
           : (project.TeamLeaderName || "Not assigned");
-        
-        const departmentNames = project.Departments && project.Departments.length > 0
-          ? project.Departments.map(d => d.DeptName).join(", ")
-          : "None";
 
         return `
     <tr>
-      <td><strong>${project.ProjectName || "Untitled"}</strong></td>
-      <td>${utils.truncateText(
+      <td><strong>${utils.escapeHtml(project.ProjectName || "Untitled")}</strong></td>
+      <td>${utils.escapeHtml(utils.truncateText(
         project.Description || "No description",
         50
-      )}</td>
-      <td>${project.ClientName || "N/A"}</td>
-      <td>${teamLeaderNames}</td>
-      <td>${departmentNames}</td>
+      ))}</td>
+      <td>${utils.escapeHtml(project.ClientName || "N/A")}</td>
+      <td>${utils.escapeHtml(teamLeaderNames)}</td>
       <td><span class="badge badge-info">${
         project.TaskCount || 0
       } tasks</span></td>
@@ -313,12 +299,6 @@ async function editProject(id) {
      });
   }
 
-  // Set Departments
-  const departmentSelect = document.getElementById("departmentId");
-  Array.from(departmentSelect.options).forEach(option => {
-    option.selected = project.DepartmentIds && project.DepartmentIds.includes(parseInt(option.value));
-  });
-
   if (project.StartDate) {
     const startDate = new Date(project.StartDate);
     document.getElementById("startDate").value = startDate
@@ -347,16 +327,11 @@ async function handleSubmit(e) {
   const teamLeaderSelect = document.getElementById("teamLeaderId");
   const selectedTeamLeaders = Array.from(teamLeaderSelect.selectedOptions).map(opt => parseInt(opt.value));
 
-  // Get selected departments
-  const departmentSelect = document.getElementById("departmentId");
-  const selectedDepartments = Array.from(departmentSelect.selectedOptions).map(opt => parseInt(opt.value));
-
   const formData = {
     ProjectName: document.getElementById("name").value,
     Description: document.getElementById("description").value || null,
     ClientId: parseInt(document.getElementById("clientId").value),
     TeamLeaderIds: selectedTeamLeaders,
-    DepartmentIds: selectedDepartments,
     StartDate: document.getElementById("startDate").value || null,
     EndDate: document.getElementById("endDate").value || null,
   };
@@ -369,6 +344,28 @@ async function handleSubmit(e) {
   // Legacy support for single TeamLeaderId
   if (selectedTeamLeaders.length > 0) {
     formData.TeamLeaderId = selectedTeamLeaders[0];
+  }
+
+  // Date validation
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (formData.StartDate) {
+    if (new Date(formData.StartDate) < today) {
+      utils.showError("Start date cannot be in the past");
+      return;
+    }
+  }
+  if (formData.EndDate) {
+    if (new Date(formData.EndDate) < today) {
+      utils.showError("End date cannot be in the past");
+      return;
+    }
+  }
+  if (formData.StartDate && formData.EndDate) {
+    if (new Date(formData.EndDate) < new Date(formData.StartDate)) {
+      utils.showError("End date cannot be before the start date");
+      return;
+    }
   }
 
   try {

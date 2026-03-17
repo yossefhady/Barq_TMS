@@ -108,7 +108,7 @@ function populateFilterDropdowns() {
         const sortedValues = Array.from(uniqueValues).sort();
         let optionsHtml = '<option value="">All</option>';
         sortedValues.forEach(val => {
-             optionsHtml += `<option value="${val}">${val}</option>`;
+             optionsHtml += `<option value="${utils.escapeHtml(val)}">${utils.escapeHtml(val)}</option>`;
         });
 
         filterValue.innerHTML = optionsHtml;
@@ -221,12 +221,12 @@ function renderEmployees() {
 
       return `
     <tr>
-      <td><strong>${emp.Name || emp.Username || "Unknown"}</strong></td>
-      <td>${emp.Username || "N/A"}</td>
-      <td>${emp.Email || "N/A"}</td>
-      <td><span class="badge badge-info">${roleName}</span></td>
-      <td>${deptNames}</td>
-      <td>${teamLeaderName}</td>
+      <td><strong>${utils.escapeHtml(emp.Name || emp.Username || "Unknown")}</strong></td>
+      <td>${utils.escapeHtml(emp.Username || "N/A")}</td>
+      <td>${utils.escapeHtml(emp.Email || "N/A")}</td>
+      <td><span class="badge badge-info">${utils.escapeHtml(roleName)}</span></td>
+      <td>${utils.escapeHtml(deptNames)}</td>
+      <td>${utils.escapeHtml(teamLeaderName)}</td>
       <td>
         ${actionsHtml}
       </td>

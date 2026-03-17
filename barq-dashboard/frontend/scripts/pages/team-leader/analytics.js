@@ -28,12 +28,14 @@ async function loadAnalytics() {
 
 function calculateTaskStats(tasks) {
   const now = new Date();
+  const getStatusId = (t) => (t.StatusId !== undefined ? t.StatusId : t.statusId);
 
-  const completed = tasks.filter((t) => t.StatusId === 4).length;
-  const pending = tasks.filter((t) => t.StatusId === 1).length;
-  const inProgress = tasks.filter((t) => t.StatusId === 2).length;
+  const completed = tasks.filter((t) => getStatusId(t) === 3).length;
+  const pending = tasks.filter((t) => getStatusId(t) === 0).length;
+  const inProgress = tasks.filter((t) => getStatusId(t) === 1).length;
   const overdue = tasks.filter((t) => {
-    if (!t.DueDate || t.StatusId === 4 || t.StatusId === 5) return false;
+    const statusId = getStatusId(t);
+    if (!t.DueDate || statusId === 3 || statusId === 4) return false;
     const dueDate = new Date(t.DueDate);
     dueDate.setHours(23, 59, 59, 999);
     return dueDate < now;
@@ -73,7 +75,7 @@ function renderBudgetOverview(projects, tasks) {
   // Calculate completion for each project based on tasks
   const projectsWithCompletion = projects.map((project) => {
     const projectTasks = tasks.filter((t) => t.ProjectId === project.ProjectId);
-    const completedTasks = projectTasks.filter((t) => t.StatusId === 4).length;
+    const completedTasks = projectTasks.filter((t) => (t.StatusId !== undefined ? t.StatusId : t.statusId) === 3).length;
     const totalTasks = projectTasks.length;
     const completion =
       totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -136,8 +138,8 @@ function renderTeamPerformance(tasks, employees) {
     .map((employee) => {
       const userId = employee.UserId;
       const assignedTasks = tasks.filter((t) => t.AssignedTo === userId);
-      const completed = assignedTasks.filter((t) => t.StatusId === 4).length;
-      const inProgress = assignedTasks.filter((t) => t.StatusId === 2).length;
+      const completed = assignedTasks.filter((t) => (t.StatusId !== undefined ? t.StatusId : t.statusId) === 3).length;
+      const inProgress = assignedTasks.filter((t) => (t.StatusId !== undefined ? t.StatusId : t.statusId) === 1).length;
       const completionRate =
         assignedTasks.length > 0
           ? Math.round((completed / assignedTasks.length) * 100)

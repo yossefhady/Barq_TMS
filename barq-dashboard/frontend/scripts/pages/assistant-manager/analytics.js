@@ -9,15 +9,34 @@ async function loadAnalytics() {
   try {
     utils.showLoading();
 
-    const [tasks, projects, users] = await Promise.all([
+    const currentUser = auth.getCurrentUser();
+    const myId = currentUser.UserId || currentUser.userId;
+
+    const [tasks, projects, allUsers] = await Promise.all([
       API.Tasks.getAll().catch(() => []),
       API.Projects.getAll().catch(() => []),
       API.Users.getAll().catch(() => []),
     ]);
 
-    calculateTaskStats(tasks);
-    renderBudgetOverview(projects, tasks);
-    renderTeamPerformance(tasks, users);
+    // Build supervised employees list (2-level hierarchy)
+    const directSubordinates = allUsers.filter(u => (u.TeamLeaderId || u.teamLeaderId) == myId);
+    const directIds = directSubordinates.map(u => Number(u.UserId || u.userId || u.Id));
+    const secondLevelSubordinates = allUsers.filter(u => {
+      const supId = Number(u.TeamLeaderId || u.teamLeaderId);
+      return supId && directIds.includes(supId);
+    });
+    const supervisedEmployees = [...directSubordinates, ...secondLevelSubordinates];
+    const supervisedIds = supervisedEmployees.map(u => Number(u.UserId || u.userId || u.Id));
+
+    // Filter tasks to only those assigned to supervised employees
+    const filteredTasks = tasks.filter(t => {
+      const assignedTo = Number(t.AssignedTo || t.assignedTo || 0);
+      return assignedTo && supervisedIds.includes(assignedTo);
+    });
+
+    calculateTaskStats(filteredTasks);
+    renderBudgetOverview(projects, filteredTasks);
+    renderTeamPerformance(filteredTasks, supervisedEmployees);
   } catch (error) {
     console.error("Error loading analytics:", error);
     utils.showError("Failed to load analytics data");
@@ -90,8 +109,8 @@ function renderBudgetOverview(projects, tasks) {
     .map((project) => {
       return `
       <tr>
-        <td><strong>${project.ProjectName || "Untitled"}</strong></td>
-        <td>${project.ClientName || "No Client"}</td>
+        <td><strong>${utils.escapeHtml(project.ProjectName || "Untitled")}</strong></td>
+        <td>${utils.escapeHtml(project.ClientName || "No Client")}</td>
         <td><span class="badge badge-info">${
           project.totalTasks
         } tasks</span> <span class="badge badge-success">${
@@ -145,7 +164,7 @@ function renderTeamPerformance(tasks, users) {
 
       return `
       <tr>
-        <td><strong>${user.Name || user.Username || "Unknown"}</strong></td>
+        <td><strong>${utils.escapeHtml(user.Name || user.Username || "Unknown")}</strong></td>
         <td>${assignedTasks.length}</td>
         <td><span class="badge badge-success">${completed}</span></td>
         <td><span class="badge badge-info">${inProgress}</span></td>

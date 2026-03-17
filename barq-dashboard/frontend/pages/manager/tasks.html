@@ -224,152 +224,156 @@
                 />
               </div>
               <div class="form-group">
-                <label for="description">Description</label>
+                <label for="description">Description *</label>
                 <textarea
                   class="form-control"
                   id="description"
                   name="description"
                   rows="3"
+                  required
                 ></textarea>
               </div>
               <div class="form-group">
                 <label for="deptId">Department *</label>
-                <select class="form-control" id="deptId" name="deptId" required onchange="toggleTaskFields()">
+                <select class="form-control" id="deptId" name="deptId" required onchange="onDeptSelected()">
                   <option value="">Select Department</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="projectId">Project</label>
-                <select class="form-control" id="projectId" name="projectId">
-                  <option value="">Select Project</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="assignedToId">Assign To</label>
+                <label for="assignedToId">Employee *</label>
                 <select
                   class="form-control"
                   id="assignedToId"
                   name="assignedToId"
+                  required
                 >
                   <option value="">Select Employee</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label for="status">Status *</label>
-                <select class="form-control" id="status" name="status" required>
-                  <option value="0">Pending</option>
-                  <option value="1">In Progress</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="priority">Priority *</label>
-                <select
-                  class="form-control"
-                  id="priority"
-                  name="priority"
-                  required
-                >
-                  <option value="0">Low</option>
-                  <option value="1">Medium</option>
-                  <option value="2">High</option>
-                  <option value="3">Critical</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="dueDate">Due Date</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  id="dueDate"
-                  name="dueDate"
-                />
-              </div>
-              <div class="form-group">
-                <label for="specificTime">Specific Time</label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="specificTime"
-                  name="specificTime"
-                />
-              </div>
-              <div class="form-group">
-                <label for="estimatedHours">Estimated Hours</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  id="estimatedHours"
-                  name="estimatedHours"
-                  step="0.5"
-                  min="0"
-                />
-              </div>
-              <div class="form-group">
-                <label for="tags">Tags</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="tags"
-                  name="tags"
-                  placeholder="Comma separated tags"
-                />
+
+              <!-- Department-specific fields (shown after department is selected) -->
+              <div id="deptFields" style="display: none;">
+
+                <!-- Creative/Marketing/Graphic fields -->
+                <div id="creativeFields" style="display: none;">
+                  <div class="form-group">
+                    <label for="projectId">Project *</label>
+                    <select class="form-control" id="projectId" name="projectId">
+                      <option value="">Select Project</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="status">Status *</label>
+                    <select class="form-control" id="status" name="status" required>
+                      <option value="0">Pending</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="priority">Priority *</label>
+                    <select class="form-control" id="priority" name="priority" required>
+                      <option value="0">Low</option>
+                      <option value="1">Medium</option>
+                      <option value="2">High</option>
+                      <option value="3">Critical</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="dueDate">Due Date *</label>
+                    <input type="date" class="form-control" id="dueDate" name="dueDate" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="driveUploadLink">Drive Upload Folder Link *</label>
+                    <input
+                      type="url"
+                      class="form-control"
+                      id="driveUploadLink"
+                      name="driveUploadLink"
+                      placeholder="https://drive.google.com/..."
+                      required
+                    />
+                    <small class="form-text text-muted">Link to upload finished task</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="driveMaterialLink">Drive Material Folder Link</label>
+                    <input
+                      type="url"
+                      class="form-control"
+                      id="driveMaterialLink"
+                      name="driveMaterialLink"
+                      placeholder="https://drive.google.com/..."
+                    />
+                    <small class="form-text text-muted">Link to task materials (optional)</small>
+                  </div>
+                </div>
+
+                <!-- Sales fields -->
+                <div id="salesFields" style="display: none;">
+                  <div class="form-group">
+                    <label for="salesStatus">Status *</label>
+                    <select class="form-control" id="salesStatus" name="salesStatus" required>
+                      <option value="0">Pending</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="salesPriority">Priority *</label>
+                    <select class="form-control" id="salesPriority" name="salesPriority" required>
+                      <option value="0">Low</option>
+                      <option value="1">Medium</option>
+                      <option value="2">High</option>
+                      <option value="3">Critical</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="salesDueDate">Due Date *</label>
+                    <input type="date" class="form-control" id="salesDueDate" name="salesDueDate" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="salesActivityType">Activity Type *</label>
+                    <select class="form-control" id="salesActivityType" name="salesActivityType" required>
+                      <option value="">Select Activity</option>
+                      <option value="0">Face to Face</option>
+                      <option value="1">Online Meeting</option>
+                      <option value="2">Phone Call</option>
+                      <option value="3">Office Work</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="salesClientInfo">Client Info *</label>
+                    <input type="text" class="form-control" id="salesClientInfo" name="salesClientInfo" placeholder="Client Name / Contact" required />
+                  </div>
+                  <div class="form-group" id="salesMarketSegmentGroup" style="display: none;">
+                    <label for="salesMarketSegmentId">Market Segment</label>
+                    <select class="form-control" id="salesMarketSegmentId" name="salesMarketSegmentId">
+                      <option value="">Select Segment</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Management fields -->
+                <div id="mgmtFields" style="display: none;">
+                  <div class="form-group">
+                    <label for="mgmtStatus">Status *</label>
+                    <select class="form-control" id="mgmtStatus" name="mgmtStatus" required>
+                      <option value="0">Pending</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="mgmtPriority">Priority *</label>
+                    <select class="form-control" id="mgmtPriority" name="mgmtPriority" required>
+                      <option value="0">Low</option>
+                      <option value="1">Medium</option>
+                      <option value="2">High</option>
+                      <option value="3">Critical</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="mgmtDueDate">Due Date *</label>
+                    <input type="date" class="form-control" id="mgmtDueDate" name="mgmtDueDate" required />
+                  </div>
+                </div>
+
               </div>
 
-              <!-- Creative Fields -->
-              <div id="creativeFields">
-                <div class="form-group">
-                  <label for="driveUploadLink">Drive Upload Folder Link</label>
-                  <input
-                    type="url"
-                    class="form-control"
-                    id="driveUploadLink"
-                    name="driveUploadLink"
-                    placeholder="https://drive.google.com/..."
-                  />
-                  <small class="form-text text-muted"
-                    >Link to upload finished task</small
-                  >
-                </div>
-                <div class="form-group">
-                  <label for="driveMaterialLink"
-                    >Drive Material Folder Link</label
-                  >
-                  <input
-                    type="url"
-                    class="form-control"
-                    id="driveMaterialLink"
-                    name="driveMaterialLink"
-                    placeholder="https://drive.google.com/..."
-                  />
-                  <small class="form-text text-muted"
-                    >Link to task materials (optional)</small
-                  >
-                </div>
-              </div>
-
-              <!-- Sales Fields -->
-              <div id="salesFields" style="display: none;">
-                <div class="form-group">
-                  <label for="salesActivityType">Activity Type *</label>
-                  <select class="form-control" id="salesActivityType" name="salesActivityType">
-                    <option value="">Select Activity</option>
-                    <option value="0">Face to Face</option>
-                    <option value="1">Online Meeting</option>
-                    <option value="2">Phone Call</option>
-                    <option value="3">Office Work</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                   <label for="salesClientInfo">Client Info *</label>
-                   <input type="text" class="form-control" id="salesClientInfo" name="salesClientInfo" placeholder="Client Name / Contact">
-                </div>
-                 <div class="form-group">
-                  <label for="salesMarketSegmentId">Market Segment</label>
-                  <select class="form-control" id="salesMarketSegmentId" name="salesMarketSegmentId">
-                    <option value="">Select Segment</option>
-                  </select>
-                </div>
-              </div>
               <div class="form-actions">
                 <button
                   type="button"

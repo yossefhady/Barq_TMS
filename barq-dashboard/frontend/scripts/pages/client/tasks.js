@@ -117,25 +117,25 @@ function renderTasks() {
       (task) => `
     <tr>
       <td>
-        <strong>${task.name}</strong>
+        <strong>${utils.escapeHtml(task.name)}</strong>
         ${
           task.description
-            ? `<br><small style="color: var(--text-secondary)">${task.description.substring(
+            ? `<br><small style="color: var(--text-secondary)">${utils.escapeHtml(task.description.substring(
                 0,
                 80
-              )}...</small>`
+              ))}...</small>`
             : ""
         }
       </td>
-      <td>${task.projectName || "N/A"}</td>
+      <td>${utils.escapeHtml(task.projectName || "N/A")}</td>
       <td>
         <span class="badge badge-${getPriorityClass(task.priority)}">
-          ${task.priority || "Medium"}
+          ${utils.escapeHtml(task.priority || "Medium")}
         </span>
       </td>
       <td>
         <span class="badge badge-${getStatusClass(task.status)}">
-          ${formatStatus(task.status)}
+          ${utils.escapeHtml(formatStatus(task.status))}
         </span>
       </td>
       <td>
@@ -185,12 +185,12 @@ function reviewTask(taskId) {
     <div class="details-grid">
       <div class="detail-item">
         <span class="detail-label">Task Name</span>
-        <span class="detail-value">${currentReviewTask.name}</span>
+        <span class="detail-value">${utils.escapeHtml(currentReviewTask.name)}</span>
       </div>
       <div class="detail-item">
         <span class="detail-label">Project</span>
         <span class="detail-value">${
-          currentReviewTask.projectName || "N/A"
+          utils.escapeHtml(currentReviewTask.projectName || "N/A")
         }</span>
       </div>
       <div class="detail-item">
@@ -199,7 +199,7 @@ function reviewTask(taskId) {
           <span class="badge badge-${getPriorityClass(
             currentReviewTask.priority
           )}">
-            ${currentReviewTask.priority || "Medium"}
+            ${utils.escapeHtml(currentReviewTask.priority || "Medium")}
           </span>
         </span>
       </div>
@@ -214,13 +214,13 @@ function reviewTask(taskId) {
       <div class="detail-item" style="grid-column: 1 / -1">
         <span class="detail-label">Description</span>
         <span class="detail-value">${
-          currentReviewTask.description || "No description"
+          utils.escapeHtml(currentReviewTask.description || "No description")
         }</span>
       </div>
       <div class="detail-item" style="grid-column: 1 / -1">
         <span class="detail-label">Work Completed</span>
         <span class="detail-value" style="background: var(--surface-secondary); padding: var(--space-3); border-radius: var(--radius-md);">
-          ${currentReviewTask.completionNotes || "No completion notes provided"}
+          ${utils.escapeHtml(currentReviewTask.completionNotes || "No completion notes provided")}
         </span>
       </div>
       ${
@@ -233,8 +233,8 @@ function reviewTask(taskId) {
             ${currentReviewTask.attachments
               .map(
                 (att) => `
-              <a href="${att.url}" target="_blank" class="btn btn-sm btn-secondary">
-                <i class="fa-solid fa-paperclip"></i> ${att.name}
+              <a href="${utils.sanitizeUrl(att.url)}" target="_blank" class="btn btn-sm btn-secondary">
+                <i class="fa-solid fa-paperclip"></i> ${utils.escapeHtml(att.name)}
               </a>
             `
               )

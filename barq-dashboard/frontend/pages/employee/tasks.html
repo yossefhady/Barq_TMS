@@ -1,11 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Tasks - Barq TMS</title>
-
-    <!-- Stylesheets -->
+    <title>All Tasks - Barq TMS</title>
     <link rel="stylesheet" href="../../styles/main.css" />
     <link
       rel="stylesheet"
@@ -14,9 +12,7 @@
   </head>
   <body>
     <div class="app">
-      <!-- SIDEBAR -->
       <aside class="sidebar">
-        <!-- Sidebar Header -->
         <div class="sidebar-header">
           <div class="sidebar-logo">
             <i
@@ -30,7 +26,6 @@
           </div>
         </div>
 
-        <!-- Sidebar Navigation -->
         <nav class="sidebar-nav">
           <div class="nav-section">
             <a href="dashboard.html" class="nav-item">
@@ -39,13 +34,13 @@
               ></span>
               <span class="nav-item-text">Dashboard</span>
             </a>
-            <a href="my-tasks.html" class="nav-item active">
+            <a href="my-tasks.html" class="nav-item">
               <span class="nav-item-icon"
                 ><i class="fa-solid fa-clipboard-list"></i
               ></span>
               <span class="nav-item-text">My Tasks</span>
             </a>
-            <a href="tasks.html" class="nav-item">
+            <a href="tasks.html" class="nav-item active">
               <span class="nav-item-icon"
                 ><i class="fa-solid fa-list-check"></i
               ></span>
@@ -82,7 +77,6 @@
           </div>
         </nav>
 
-        <!-- Sidebar Footer -->
         <div class="sidebar-footer">
           <div class="sidebar-user">
             <div class="sidebar-user-avatar">U</div>
@@ -94,9 +88,7 @@
         </div>
       </aside>
 
-      <!-- MAIN CONTENT -->
       <main class="main">
-        <!-- Header -->
         <header class="header">
           <div class="header-left">
             <button class="menu-toggle">
@@ -109,7 +101,7 @@
               <input
                 type="text"
                 class="search-input"
-                placeholder="Search my tasks..."
+                placeholder="Search tasks..."
               />
             </div>
           </div>
@@ -117,30 +109,26 @@
           <div class="header-right">
             <button class="header-btn notification-btn">
               <i class="fa-solid fa-bell"></i>
-              <span class="badge">3</span>
+              <span class="badge">0</span>
             </button>
-
             <div class="user-menu">
               <div class="user-avatar">U</div>
-              <span class="user-name">User Name</span>
+              <span class="user-name">Loading...</span>
             </div>
           </div>
         </header>
 
-        <!-- Content Area -->
         <div class="content">
-          <!-- Page Header -->
           <div style="margin-bottom: var(--space-6)">
-            <h2>My Tasks</h2>
+            <h2>All Tasks</h2>
             <p style="color: var(--text-secondary); margin: 0">
-              Manage and update your assigned tasks
+              View all tasks across your projects
             </p>
           </div>
 
-          <!-- My Tasks Card -->
           <div class="card">
             <div class="card-header">
-              <h3>Tasks Assigned to Me</h3>
+              <h3>Tasks</h3>
               <div>
                 <select
                   class="form-control"
@@ -161,13 +149,13 @@
                   <tr>
                     <th>Task</th>
                     <th>Project</th>
+                    <th>Assigned To</th>
                     <th>Status</th>
                     <th>Priority</th>
                     <th>Due Date</th>
-                    <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody id="myTasksBody">
+                <tbody id="tasksBody">
                   <tr>
                     <td colspan="6" class="text-center" style="padding: 40px">
                       <div class="spinner"></div>
@@ -181,37 +169,6 @@
       </main>
     </div>
 
-    <!-- Task Details Modal -->
-    <div id="taskDetailsModal" class="modal-backdrop d-none">
-      <div class="modal-dialog" style="max-width: 700px">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 id="detailsTaskTitle">Task Details</h3>
-            <button class="btn-icon" onclick="closeDetailsModal()">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div id="taskDetailsContent">
-                <!-- Content will be injected by JS -->
-                <div class="text-center p-5">
-                    <i class="fas fa-circle-notch fa-spin fa-2x"></i>
-                    <p class="mt-2">Loading...</p>
-                </div>
-            </div>
-            
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeDetailsModal()">
-              Close
-            </button>
-            <!-- Dynamic Buttons will be injected here -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Scripts -->
     <!-- SignalR Client -->
     <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
 
@@ -224,6 +181,6 @@
     <script src="../../scripts/utils/notifications.js"></script>
     <script src="../../scripts/components/notification-panel.js"></script>
 
-    <script src="../../scripts/pages/employee/my-tasks.js"></script>
+    <script src="../../scripts/pages/employee/tasks.js"></script>
   </body>
 </html>

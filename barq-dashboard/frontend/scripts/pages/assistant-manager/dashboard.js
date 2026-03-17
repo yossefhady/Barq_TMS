@@ -13,12 +13,31 @@ async function loadDashboardData() {
   try {
     utils.showLoading();
 
+    const currentUser = auth.getCurrentUser();
+    const myId = currentUser.UserId || currentUser.userId;
+
     // Fetch all data in parallel
-    const [tasks, projects, users] = await Promise.all([
+    const [tasks, projects, allUsers] = await Promise.all([
       API.Tasks.getAll().catch(() => []),
       API.Projects.getAll().catch(() => []),
       API.Users.getAll().catch(() => []),
     ]);
+
+    // Build supervised employees list (2-level hierarchy)
+    const directSubordinates = allUsers.filter(u => (u.TeamLeaderId || u.teamLeaderId) == myId);
+    const directIds = directSubordinates.map(u => Number(u.UserId || u.userId || u.Id));
+    const secondLevelSubordinates = allUsers.filter(u => {
+      const supId = Number(u.TeamLeaderId || u.teamLeaderId);
+      return supId && directIds.includes(supId);
+    });
+    const supervisedEmployees = [...directSubordinates, ...secondLevelSubordinates];
+    const supervisedIds = supervisedEmployees.map(u => Number(u.UserId || u.userId || u.Id));
+
+    // Filter tasks to only those assigned to supervised employees
+    const filteredTasks = tasks.filter(t => {
+      const assignedTo = Number(t.AssignedTo || t.assignedTo || 0);
+      return assignedTo && supervisedIds.includes(assignedTo);
+    });
 
     // Extract unique clients from projects
     const clientsMap = new Map();
@@ -32,11 +51,11 @@ async function loadDashboardData() {
     });
     const clients = Array.from(clientsMap.values());
 
-    // Update stats
-    updateStats({ tasks, projects, employees: users, clients });
+    // Update stats with filtered data
+    updateStats({ tasks: filteredTasks, projects, employees: supervisedEmployees, clients });
 
     // Render recent data
-    renderRecentTasks(tasks.slice(0, 10));
+    renderRecentTasks(filteredTasks.slice(0, 10));
     renderRecentProjects(projects.slice(0, 5));
   } catch (error) {
     console.error("Error loading dashboard:", error);
@@ -77,9 +96,9 @@ function renderRecentTasks(tasks) {
     .map(
       (task) => `
     <tr>
-      <td><strong>${task.Title || "Untitled Task"}</strong></td>
-      <td>${task.ProjectName || "N/A"}</td>
-      <td>${task.AssignedToName || "Unassigned"}</td>
+      <td><strong>${utils.escapeHtml(task.Title || "Untitled Task")}</strong></td>
+      <td>${utils.escapeHtml(task.ProjectName || "N/A")}</td>
+      <td>${utils.escapeHtml(task.AssignedToName || "Unassigned")}</td>
       <td>${utils.getStatusBadge(task.StatusId || 1)}</td>
       <td>${utils.getPriorityBadge(task.PriorityId || 1)}</td>
       <td>${utils.formatDate(task.DueDate)}</td>
@@ -112,8 +131,8 @@ function renderRecentProjects(projects) {
     .map(
       (project) => `
     <tr>
-      <td><strong>${project.ProjectName || "Untitled Project"}</strong></td>
-      <td>${project.ClientName || "N/A"}</td>
+      <td><strong>${utils.escapeHtml(project.ProjectName || "Untitled Project")}</strong></td>
+      <td>${utils.escapeHtml(project.ClientName || "N/A")}</td>
       <td><span class="badge badge-info">${
         project.TaskCount || 0
       } tasks</span></td>

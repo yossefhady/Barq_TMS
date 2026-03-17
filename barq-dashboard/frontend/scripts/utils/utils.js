@@ -281,6 +281,26 @@ function getInitials(name) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+// SECURITY: HTML escaping to prevent XSS
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  const text = String(str);
+  const div = document.createElement("div");
+  div.appendChild(document.createTextNode(text));
+  return div.innerHTML;
+}
+
+// SECURITY: URL sanitization to prevent javascript: URI injection
+function sanitizeUrl(url) {
+  if (!url) return "#";
+  // Strip control characters and whitespace that could break protocol detection
+  const cleaned = String(url).replace(/[\x00-\x1f\x7f]/g, "").trim();
+  if (/^(javascript|data|vbscript|blob):/i.test(cleaned)) {
+    return "#";
+  }
+  return cleaned;
+}
+
 // Export functions to window
 window.utils = {
   getInitials,
@@ -300,6 +320,8 @@ window.utils = {
   formatCurrency,
   truncateText,
   showToast,
+  escapeHtml,
+  sanitizeUrl,
 };
 
 function showToast(message, type = 'info') {

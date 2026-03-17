@@ -22,7 +22,7 @@ function setupEventListeners() {
 async function loadTasks() {
   try {
     utils.showLoading();
-    allTasks = await API.Tasks.getAll().catch(() => []);
+    allTasks = await API.Tasks.getAll();
     renderTasks(allTasks);
   } catch (error) {
     console.error("Error loading tasks:", error);
@@ -46,7 +46,7 @@ function filterTasks() {
 
   if (statusFilter) {
     filtered = filtered.filter(
-      (task) => (task.statusId || task.StatusId) == statusFilter
+      (task) => (task.statusId ?? task.StatusId) == statusFilter
     );
   }
 
@@ -57,7 +57,7 @@ function filterTasks() {
 function renderTasks(tasks) {
   const tbody = document.getElementById("tasksBody");
 
-  if (tasks.length === 0) {
+  if (!tasks || tasks.length === 0) {
     tbody.innerHTML = `
       <tr>
         <td colspan="6" class="text-center" style="padding: 40px;">
@@ -74,13 +74,13 @@ function renderTasks(tasks) {
 
   tbody.innerHTML = tasks
     .map((task) => {
-      const statusId = task.statusId || task.StatusId || 1;
-      const priorityId = task.priorityId || task.PriorityId || 1;
+      const statusId = task.statusId ?? task.StatusId ?? 0;
+      const priorityId = task.priorityId ?? task.PriorityId ?? 0;
       return `
     <tr>
-      <td><strong>${task.Title || task.title || "Untitled Task"}</strong></td>
-      <td>${task.ProjectName || task.projectName || "N/A"}</td>
-      <td>${task.AssignedToName || task.assignedToName || "Unassigned"}</td>
+      <td><strong>${utils.escapeHtml(task.Title || task.title || "Untitled Task")}</strong></td>
+      <td>${utils.escapeHtml(task.ProjectName || task.projectName || "N/A")}</td>
+      <td>${utils.escapeHtml(task.AssignedToName || task.assignedToName || "Unassigned")}</td>
       <td>${utils.getStatusBadge(statusId)}</td>
       <td>${utils.getPriorityBadge(priorityId)}</td>
       <td>${utils.formatDate(task.DueDate || task.dueDate)}</td>

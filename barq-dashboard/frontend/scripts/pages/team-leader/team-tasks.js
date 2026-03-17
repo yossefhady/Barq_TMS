@@ -325,21 +325,21 @@ function renderTasks(tasks) {
           const act = (task.SalesActivityType && activityMap[task.SalesActivityType]) 
                     ? activityMap[task.SalesActivityType] 
                     : '<span style="color:var(--text-secondary)">-</span>';
-          const client = task.SalesClientInfo || '<span style="color:var(--text-secondary)">-</span>';
-          
+          const client = task.SalesClientInfo ? utils.escapeHtml(task.SalesClientInfo) : '<span style="color:var(--text-secondary)">-</span>';
+
           middleCols = `
             <td>${act}</td>
             <td>${client}</td>
           `;
       } else {
-        middleCols = `<td>${task.ProjectName || "N/A"}</td>`;
+        middleCols = `<td>${utils.escapeHtml(task.ProjectName || "N/A")}</td>`;
       }
-      
+
       return `
     <tr style="${needsReview ? "border-left: 4px solid #ff9800;" : ""}">
-      <td><strong>${task.Title || "Untitled Task"}</strong>${reviewBadge}</td>
+      <td><strong>${utils.escapeHtml(task.Title || "Untitled Task")}</strong>${reviewBadge}</td>
       ${middleCols}
-      <td>${task.AssignedToName || "Unassigned"}</td>
+      <td>${utils.escapeHtml(task.AssignedToName || "Unassigned")}</td>
       <td>${utils.getStatusBadge(statusId)}</td>
       <td>${utils.getPriorityBadge(task.PriorityId !== undefined ? task.PriorityId : 1)}</td>
       <td>${utils.formatDate(task.DueDate)}</td>
@@ -365,15 +365,61 @@ function renderTasks(tasks) {
     .join("");
 }
 
+// Restrict status dropdown options based on state machine transitions.
+// isEdit=false (create): only show Pending.
+// isEdit=true  (edit):   show current status + valid next states.
+function updateStatusDropdown(isEdit, currentStatusId) {
+  const statusSelect = document.getElementById("statusId");
+  statusSelect.innerHTML = '';
+
+  // Fallback labels in case the statuses array is empty
+  const statusLabels = {
+    0: 'Pending',
+    1: 'In Progress',
+    2: 'In Review',
+    3: 'Completed',
+    4: 'Closed'
+  };
+
+  // Valid state-machine transitions
+  const validTransitions = {
+    0: [1],        // Pending     → InProgress
+    1: [2, 4],     // InProgress  → InReview, Closed
+    2: [3, 1],     // InReview    → Completed, InProgress (reject back)
+    3: [],         // Completed   → (terminal)
+    4: []          // Closed      → (terminal)
+  };
+
+  let allowedIds;
+  if (!isEdit) {
+    allowedIds = [0]; // create mode – only Pending
+  } else {
+    const nextStates = validTransitions[currentStatusId] || [];
+    allowedIds = [currentStatusId, ...nextStates];
+  }
+
+  allowedIds.forEach(id => {
+    const option = document.createElement("option");
+    option.value = id;
+    const statusObj = statuses.find(s => (s.StatusId !== undefined ? s.StatusId : s.statusId) === id);
+    option.textContent = statusObj
+      ? (statusObj.StatusName || statusObj.statusName)
+      : (statusLabels[id] || 'Unknown');
+    statusSelect.appendChild(option);
+  });
+
+  statusSelect.value = currentStatusId;
+}
+
 function showCreateModal() {
   currentEditId = null;
   const form = document.getElementById("taskForm");
   form.reset();
   document.getElementById("modalTitle").textContent = "Create New Task";
   
-  // Enforce Pending status for new tasks
+  // Enforce Pending status for new tasks (state machine: create → Pending only)
+  updateStatusDropdown(false, 0);
   const statusSelect = document.getElementById("statusId");
-  statusSelect.value = "0"; // Pending
   statusSelect.disabled = true; // Prevent changing status during creation
 
   // Check Sales
@@ -592,17 +638,17 @@ async function viewTask(taskId) {
       <div class="details-grid" style="margin-bottom: var(--space-4);">
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-heading"></i> Task Title</label>
-            <div class="detail-value">${task.title || task.Title}</div>
+            <div class="detail-value">${utils.escapeHtml(task.title || task.Title)}</div>
           </div>
-          
+
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-align-left"></i> Description</label>
-            <div class="detail-value">${task.description || task.Description || "No description"}</div>
+            <div class="detail-value">${utils.escapeHtml(task.description || task.Description || "No description")}</div>
           </div>
-          
+
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-user"></i> Assigned To</label>
-            <div class="detail-value">${task.assignedToName || task.AssignedToName || "Unassigned"}</div>
+            <div class="detail-value">${utils.escapeHtml(task.assignedToName || task.AssignedToName || "Unassigned")}</div>
           </div>
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-flag"></i> Priority</label>
@@ -610,20 +656,20 @@ async function viewTask(taskId) {
           </div>
           <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-info-circle"></i> Status</label>
-            <div class="detail-value">${utils.getStatusBadge(task.statusId || task.StatusId)}</div>
+            <div class="detail-value">${utils.getStatusBadge(task.statusId ?? task.StatusId ?? 0)}</div>
           </div>
         ${!isSalesTeamLeader ? `
         <div class="detail-item">
           <label class="detail-label"><i class="fa-solid fa-folder"></i> Project</label>
-          <div class="detail-value">${task.projectName || task.ProjectName || "No Project"}</div>
+          <div class="detail-value">${utils.escapeHtml(task.projectName || task.ProjectName || "No Project")}</div>
         </div>` : `
         <div class="detail-item">
           <label class="detail-label"><i class="fa-solid fa-user-tie"></i> Client Info</label>
-          <div class="detail-value">${task.SalesClientInfo || "-"}</div>
+          <div class="detail-value">${utils.escapeHtml(task.SalesClientInfo || "-")}</div>
         </div>
         <div class="detail-item">
           <label class="detail-label"><i class="fa-solid fa-location-dot"></i> Location</label>
-          <div class="detail-value">${task.SalesMarketSegmentPlace || task.salesMarketSegmentPlace || "-"}</div>
+          <div class="detail-value">${utils.escapeHtml(task.SalesMarketSegmentPlace || task.salesMarketSegmentPlace || "-")}</div>
         </div>
         <div class="detail-item">
             <label class="detail-label"><i class="fa-solid fa-list-check"></i> Activity Type</label>
@@ -645,7 +691,7 @@ async function viewTask(taskId) {
         `}
         <div class="detail-item">
           <label class="detail-label"><i class="fa-solid fa-user-pen"></i> Created By</label>
-          <div class="detail-value">${task.createdByName || task.CreatedByName || "Unknown"}</div>
+          <div class="detail-value">${utils.escapeHtml(task.createdByName || task.CreatedByName || "Unknown")}</div>
         </div>
         <div class="detail-item">
           <label class="detail-label"><i class="fa-solid fa-calendar"></i> Due Date</label>
@@ -660,10 +706,10 @@ async function viewTask(taskId) {
           ${task.Comments.map(c => `
              <div style="margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px;">
                  <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="color: var(--text-primary); font-weight: 600;">${c.UserName}</span>
+                    <span style="color: var(--text-primary); font-weight: 600;">${utils.escapeHtml(c.UserName)}</span>
                     <small style="color: var(--text-secondary);">${utils.formatDate(c.CreatedAt)}</small>
                  </div>
-                 <div style="color: var(--text-secondary); line-height: 1.4;">${c.Comment}</div>
+                 <div style="color: var(--text-secondary); line-height: 1.4;">${utils.escapeHtml(c.Comment)}</div>
              </div>
           `).join('')}
         </div>
@@ -674,12 +720,12 @@ async function viewTask(taskId) {
         <label class="detail-label"><i class="fa-solid fa-link"></i> Resources</label>
         <div class="detail-value" style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
           ${driveFolderLink ? `
-          <a href="${driveFolderLink}" target="_blank" class="btn btn-primary" style="text-decoration: none; flex: 1;">
+          <a href="${utils.sanitizeUrl(driveFolderLink)}" target="_blank" class="btn btn-primary" style="text-decoration: none; flex: 1;">
             <i class="fa-brands fa-google-drive"></i> Open Task Folder
           </a>
           ` : ''}
           ${materialDriveFolderLink ? `
-          <a href="${materialDriveFolderLink}" target="_blank" class="btn btn-secondary" style="text-decoration: none; flex: 1;">
+          <a href="${utils.sanitizeUrl(materialDriveFolderLink)}" target="_blank" class="btn btn-secondary" style="text-decoration: none; flex: 1;">
             <i class="fa-solid fa-folder-open"></i> Open Material Folder
           </a>
           ` : ''}
@@ -796,7 +842,7 @@ async function openReviewModal(taskId) {
     
     if (uploadHref && !isSalesTeamLeader) {
       uploadLinkGroup.style.display = "block";
-      document.getElementById("reviewUploadLink").href = uploadHref;
+      document.getElementById("reviewUploadLink").href = utils.sanitizeUrl(uploadHref);
     } else {
       uploadLinkGroup.style.display = "none";
     }
@@ -1019,7 +1065,8 @@ async function editTask(taskId) {
     document.getElementById("priorityId").value = pId !== undefined ? pId : "";
 
     const sId = task.StatusId !== undefined ? task.StatusId : task.statusId;
-    statusSelect.value = sId !== undefined ? sId : "";
+    // Restrict dropdown to valid state machine transitions for this status
+    updateStatusDropdown(true, sId !== undefined ? sId : 0);
     
     // Handle date format
     const dueDate = task.DueDate || task.dueDate;

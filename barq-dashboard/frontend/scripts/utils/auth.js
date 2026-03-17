@@ -32,27 +32,22 @@ class AuthManager {
   }
 
   async login(username, password) {
-    console.log("[Auth] Attempting login for user:", username);
     try {
       const response = await API.Auth.login(username, password);
-      console.log("[Auth] Login response received:", response);
 
       // API returns PascalCase: { User: UserDto, Token: string, RefreshToken: string, ExpiresIn: int }
       if (response && response.Token && response.User) {
-        console.log("[Auth] Login successful, setting auth data");
         this.setAuthData(response.Token, response.User);
         const redirectUrl = this.getDashboardUrl(response.User.Role);
-        console.log("[Auth] Redirecting to:", redirectUrl);
         return {
           success: true,
-          user: response.user,
+          user: response.User,
           redirectUrl: redirectUrl,
         };
       }
-      console.error("[Auth] Invalid response format:", response);
+      console.error("[Auth] Invalid response format");
       throw new Error("Invalid response format from server");
     } catch (error) {
-      console.error("[Auth] Login failed:", error);
       return { success: false, error: error.message };
     }
   }
@@ -87,11 +82,23 @@ class AuthManager {
   }
 
   isAuthenticated() {
-    return !!localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN);
+    const token = localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN);
+    if (!token) return false;
+    try {
+      const base64 = token.split(".")[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        this.clearAuthData();
+        return false;
+      }
+    } catch {
+      this.clearAuthData();
+      return false;
+    }
+    return true;
   }
 
   getCurrentUser() {
-    console.log(this.currentUser);
     return this.currentUser;
   }
 
@@ -179,7 +186,7 @@ function initAuthUI() {
   if(marketMapLink) {
       marketMapLink.style.display = isSales ? 'flex' : 'none';
   }
-  
+
   // Hide Projects for Sales Employees
   if (auth.getUserRole() === USER_ROLES.EMPLOYEE && isSales) {
       const projectsLink = document.getElementById('nav-projects');

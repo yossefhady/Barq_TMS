@@ -263,11 +263,11 @@ function renderTasks() {
   tbody.innerHTML = filteredTasks
     .map((task) => {
       // Properly map all fields from backend
-      const title = task.Title || "";
-      const projectName = task.ProjectName || "No Project";
+      const title = utils.escapeHtml(task.Title || "");
+      const projectName = utils.escapeHtml(task.ProjectName || "No Project");
       const statusName = task.StatusName || task.Status || "Unknown";
       const priorityLevel = task.PriorityLevel || task.Priority || "Medium";
-      const assignedToName = task.AssignedToName || "Unassigned";
+      const assignedToName = utils.escapeHtml(task.AssignedToName || "Unassigned");
 
       const dueDate = task.DueDate
         ? new Date(task.DueDate).toLocaleDateString()
@@ -342,8 +342,8 @@ function renderTasks() {
             }
           </td>
           <td>${projectName}</td>
-          <td><span class="badge ${statusClass}">${statusName}</span></td>
-          <td><span class="badge ${priorityClass}">${priorityLevel}</span></td>
+          <td><span class="badge ${statusClass}">${utils.escapeHtml(statusName)}</span></td>
+          <td><span class="badge ${priorityClass}">${utils.escapeHtml(priorityLevel)}</span></td>
           <td>${dueDate}</td>
           <td>${delegatedInfo}</td>
           <td>
@@ -527,29 +527,29 @@ async function showReviewModal(taskId) {
   // Show task details in review modal
   document.getElementById("reviewTaskDetails").innerHTML = `
     <h4 style="margin-bottom: var(--space-3);"><i class="fa-solid fa-clipboard-list"></i> ${
-      task.Title
+      utils.escapeHtml(task.Title)
     }</h4>
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3);">
       <div>
-        <strong>Project:</strong> ${task.ProjectName}
+        <strong>Project:</strong> ${utils.escapeHtml(task.ProjectName)}
       </div>
       <div>
-        <strong>Assigned To:</strong> ${task.AssignedToName}
+        <strong>Assigned To:</strong> ${utils.escapeHtml(task.AssignedToName)}
       </div>
       <div>
         <strong>Status:</strong> <span class="badge ${getStatusClass(
           task.StatusName
-        )}">${task.StatusName}</span>
+        )}">${utils.escapeHtml(task.StatusName)}</span>
       </div>
       <div>
         <strong>Priority:</strong> <span class="badge ${getPriorityClass(
           task.PriorityLevel
-        )}">${task.PriorityLevel}</span>
+        )}">${utils.escapeHtml(task.PriorityLevel)}</span>
       </div>
     </div>
     ${
       task.Description
-        ? `<div style="margin-top: var(--space-3);"><strong>Description:</strong><p>${task.Description}</p></div>`
+        ? `<div style="margin-top: var(--space-3);"><strong>Description:</strong><p>${utils.escapeHtml(task.Description)}</p></div>`
         : ""
     }
   `;
@@ -655,7 +655,7 @@ function renderTaskDetails(task, comments) {
     <div class="details-grid" style="margin-bottom: var(--space-4);">
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-heading"></i> Task Title</label>
-        <div class="detail-value">${task.title || task.Title}</div>
+        <div class="detail-value">${utils.escapeHtml(task.title || task.Title)}</div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-calendar"></i> Due Date</label>
@@ -664,32 +664,32 @@ function renderTaskDetails(task, comments) {
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-user"></i> Assigned To</label>
         <div class="detail-value">${
-          task.assignedToName || task.AssignedToName || "Unassigned"
+          utils.escapeHtml(task.assignedToName || task.AssignedToName || "Unassigned")
         }</div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-flag"></i> Priority</label>
         <div class="detail-value"><span class="badge ${getPriorityClass(
           task.priorityLevel || task.PriorityLevel
-        )}">${task.priorityLevel || task.PriorityLevel}</span></div>
+        )}">${utils.escapeHtml(task.priorityLevel || task.PriorityLevel)}</span></div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-info-circle"></i> Status</label>
         <div class="detail-value"><span class="badge ${getStatusClass(
           task.statusName || task.StatusName
-        )}">${task.statusName || task.StatusName}</span></div>
+        )}">${utils.escapeHtml(task.statusName || task.StatusName)}</span></div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-folder"></i> Project</label>
         <div class="detail-value">${
-          task.projectName || task.ProjectName || "Unknown"
+          utils.escapeHtml(task.projectName || task.ProjectName || "Unknown")
         }</div>
       </div>
     </div>
     <div class="detail-item" style="margin-bottom: var(--space-4);">
       <label class="detail-label"><i class="fa-solid fa-align-left"></i> Description</label>
       <div class="detail-value">${
-        task.description || task.Description || "No description"
+        utils.escapeHtml(task.description || task.Description || "No description")
       }</div>
     </div>
     ${(driveFolderLink || materialDriveFolderLink) ? `
@@ -697,12 +697,12 @@ function renderTaskDetails(task, comments) {
       <label class="detail-label"><i class="fa-solid fa-link"></i> Resources</label>
       <div class="detail-value" style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
         ${driveFolderLink ? `
-        <a href="${driveFolderLink}" target="_blank" class="btn btn-primary" style="text-decoration: none; flex: 1;">
+        <a href="${utils.sanitizeUrl(driveFolderLink)}" target="_blank" class="btn btn-primary" style="text-decoration: none; flex: 1;">
           <i class="fa-brands fa-google-drive"></i> Open Task Folder
         </a>
         ` : ''}
         ${materialDriveFolderLink ? `
-        <a href="${materialDriveFolderLink}" target="_blank" class="btn btn-secondary" style="text-decoration: none; flex: 1;">
+        <a href="${utils.sanitizeUrl(materialDriveFolderLink)}" target="_blank" class="btn btn-secondary" style="text-decoration: none; flex: 1;">
           <i class="fa-solid fa-folder-open"></i> Open Material Folder
         </a>
         ` : ''}
@@ -720,12 +720,12 @@ function renderTaskDetails(task, comments) {
               (c) => `
             <div style="padding: var(--space-3); background: var(--surface-secondary); border-radius: var(--radius-md); border-left: 3px solid var(--primary-color);">
               <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
-                <strong>${c.userName || c.UserName || "User"}</strong>
+                <strong>${utils.escapeHtml(c.userName || c.UserName || "User")}</strong>
                 <span style="font-size: var(--text-sm); color: var(--text-secondary);">${new Date(
                   c.createdAt || c.CreatedAt
                 ).toLocaleString()}</span>
               </div>
-              <p style="margin: 0;">${c.comment || c.Comment}</p>
+              <p style="margin: 0;">${utils.escapeHtml(c.comment || c.Comment)}</p>
             </div>
           `
             )

@@ -92,10 +92,10 @@ function renderClients() {
       (client) => `
     <tr>
       <td><strong>#${client.ClientId}</strong></td>
-      <td><strong>${client.ClientName || "Unknown"}</strong></td>
-      <td>${client.Email || "-"}</td>
-      <td>${client.PhoneNumber || "-"}</td>
-      <td>${client.Company || "-"}</td>
+      <td><strong>${utils.escapeHtml(client.ClientName || "Unknown")}</strong></td>
+      <td>${utils.escapeHtml(client.Email || "-")}</td>
+      <td>${utils.escapeHtml(client.PhoneNumber || "-")}</td>
+      <td>${utils.escapeHtml(client.Company || "-")}</td>
       <td><span class="badge badge-info">${
         client.ProjectCount || 0
       } projects</span></td>

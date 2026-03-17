@@ -2,9 +2,13 @@
 auth.requireRole([USER_ROLES.ASSISTANT_MANAGER]);
 
 let tasks = [];
+let allUsers = [];
+let supervisedEmployees = []; // Only TLs and employees under this assistant manager
 let projects = [];
-let employees = [];
+let departments = [];
+let marketSegments = [];
 let currentEditId = null;
+let currentDeptType = null; // "creative" | "sales" | "mgmt" | null
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadData();
@@ -14,14 +18,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadData() {
   try {
     utils.showLoading();
+    const currentUser = auth.getCurrentUser();
+    const myId = currentUser.UserId || currentUser.userId;
 
-    [tasks, projects, employees] = await Promise.all([
+    [tasks, allUsers, projects, departments, marketSegments] = await Promise.all([
       API.Tasks.getAll().catch(() => []),
+      API.Users.getAll().catch(() => []),
       API.Projects.getAll().catch(() => []),
-      API.Employees.getAll().catch(() => []),
+      API.Departments.getAll().catch(() => []),
+      API.Sales.getSegments ? API.Sales.getSegments().catch(() => []) : Promise.resolve([]),
     ]);
 
-    populateDropdowns();
+    // Build supervised employees list: direct reports + their subordinates (2 levels)
+    const directSubordinates = allUsers.filter(u => (u.TeamLeaderId || u.teamLeaderId) == myId);
+    const directIds = directSubordinates.map(u => Number(u.UserId || u.userId || u.Id));
+    const secondLevelSubordinates = allUsers.filter(u => {
+      const supId = Number(u.TeamLeaderId || u.teamLeaderId);
+      return supId && directIds.includes(supId);
+    });
+    supervisedEmployees = [...directSubordinates, ...secondLevelSubordinates];
+
+    populateDeptDropdown();
     renderTasks();
   } catch (error) {
     console.error("Error loading data:", error);
@@ -31,31 +48,139 @@ async function loadData() {
   }
 }
 
-function populateDropdowns() {
-  const projectSelect = document.getElementById("projectId");
-  const employeeSelect = document.getElementById("assignedToId");
+// --- Dropdown Helpers ---
 
-  projectSelect.innerHTML =
-    '<option value="">Select Project</option>' +
-    projects
-      .map(
-        (p) =>
-          `<option value="${p.projectId || p.ProjectId || p.Id}">${
-            p.projectName || p.ProjectName || p.Name || "Unnamed"
-          }</option>`
-      )
-      .join("");
-
-  employeeSelect.innerHTML =
-    '<option value="">Select Employee</option>' +
-    employees
-      .map((e) => `<option value="${e.UserId || e.Id}">${e.Name}</option>`)
-      .join("");
+function populateDeptDropdown() {
+  const select = document.getElementById("deptId");
+  if (select && departments.length > 0) {
+    select.innerHTML = '<option value="">Select Department</option>' +
+      departments.map(d => `<option value="${d.DeptId}">${d.DeptName}</option>`).join("");
+  }
 }
+
+function populateEmployeesByDept(deptId) {
+  const select = document.getElementById("assignedToId");
+  if (!deptId) {
+    select.innerHTML = '<option value="">Select Employee</option>';
+    return;
+  }
+  // Only show supervised employees that belong to the selected department
+  const filtered = supervisedEmployees.filter(e => {
+    const empDepts = e.Departments || e.departments || [];
+    return empDepts.some(d => (d.DeptId || d.deptId) == deptId);
+  });
+  select.innerHTML =
+    '<option value="">Select Employee</option>' +
+    filtered.map(e =>
+      `<option value="${e.UserId || e.Id}">${e.Name || e.name || e.Username || "Unknown"}</option>`
+    ).join("");
+}
+
+function populateProjectDropdown(deptIds) {
+  const select = document.getElementById("projectId");
+  const filtered = deptIds && deptIds.length > 0
+    ? projects.filter(p => {
+        const pDepts = p.DepartmentIds || p.departmentIds || [];
+        return pDepts.some(d => deptIds.includes(d));
+      })
+    : projects;
+  select.innerHTML =
+    '<option value="">Select Project</option>' +
+    filtered.map(p =>
+      `<option value="${p.projectId || p.ProjectId}">${p.projectName || p.ProjectName || p.Name || "Unnamed"}</option>`
+    ).join("");
+}
+
+function populateSegmentDropdown() {
+  const select = document.getElementById("salesMarketSegmentId");
+  if (select && marketSegments.length > 0) {
+    select.innerHTML = '<option value="">Select Segment</option>' +
+      marketSegments.map(s => `<option value="${s.id || s.Id}">${s.name || s.Name || s.Place || s.place}</option>`).join("");
+    const group = document.getElementById("salesMarketSegmentGroup");
+    if (group) group.style.display = "block";
+  }
+}
+
+// --- Department Detection ---
+
+function getDeptType(deptName) {
+  if (!deptName) return "creative";
+  const name = deptName.toLowerCase();
+  if (name === "sales") return "sales";
+  if (name === "management") return "mgmt";
+  return "creative";
+}
+
+// --- Department Selected: filter employees + show dept-specific fields ---
+
+window.onDeptSelected = function() {
+  const deptId = parseInt(document.getElementById("deptId").value);
+  const deptFieldsContainer = document.getElementById("deptFields");
+  const creativeFields = document.getElementById("creativeFields");
+  const salesFields = document.getElementById("salesFields");
+  const mgmtFields = document.getElementById("mgmtFields");
+
+  // Filter employees by selected department (only supervised ones)
+  populateEmployeesByDept(deptId);
+
+  if (!deptId) {
+    deptFieldsContainer.style.display = "none";
+    creativeFields.style.display = "none";
+    salesFields.style.display = "none";
+    mgmtFields.style.display = "none";
+    currentDeptType = null;
+    disableRequiredInSection(creativeFields);
+    disableRequiredInSection(salesFields);
+    disableRequiredInSection(mgmtFields);
+    return;
+  }
+
+  const dept = departments.find(d => d.DeptId == deptId);
+  const deptName = dept ? (dept.DeptName || dept.name || "") : "";
+  const type = getDeptType(deptName);
+  currentDeptType = type;
+
+  deptFieldsContainer.style.display = "block";
+  creativeFields.style.display = "none";
+  salesFields.style.display = "none";
+  mgmtFields.style.display = "none";
+  disableRequiredInSection(creativeFields);
+  disableRequiredInSection(salesFields);
+  disableRequiredInSection(mgmtFields);
+
+  if (type === "creative") {
+    creativeFields.style.display = "block";
+    enableRequiredInSection(creativeFields);
+    populateProjectDropdown([deptId]);
+  } else if (type === "sales") {
+    salesFields.style.display = "block";
+    enableRequiredInSection(salesFields);
+    populateSegmentDropdown();
+  } else if (type === "mgmt") {
+    mgmtFields.style.display = "block";
+    enableRequiredInSection(mgmtFields);
+  }
+}
+
+function disableRequiredInSection(section) {
+  if (!section) return;
+  section.querySelectorAll("[required]").forEach(el => {
+    el.dataset.wasRequired = "true";
+    el.removeAttribute("required");
+  });
+}
+
+function enableRequiredInSection(section) {
+  if (!section) return;
+  section.querySelectorAll("[data-was-required]").forEach(el => {
+    el.setAttribute("required", "");
+  });
+}
+
+// --- Render Tasks ---
 
 function renderTasks() {
   const tbody = document.getElementById("tasksBody");
-
   if (tasks.length === 0) {
     tbody.innerHTML = `
       <tr>
@@ -66,23 +191,18 @@ function renderTasks() {
             <p>Create your first task to get started</p>
           </div>
         </td>
-      </tr>
-    `;
+      </tr>`;
     return;
   }
-
-  tbody.innerHTML = tasks
-    .map((task) => {
-      const taskId = task.TaskId || task.taskId || task.Id;
-      const statusId = task.StatusId || task.statusId || task.Status || 1;
-      const priorityId =
-        task.PriorityId || task.priorityId || task.Priority || 1;
-
-      return `
+  tbody.innerHTML = tasks.map((task) => {
+    const taskId = task.TaskId || task.taskId || task.Id;
+    const statusId = task.StatusId ?? task.statusId ?? task.Status ?? 0;
+    const priorityId = task.PriorityId ?? task.priorityId ?? task.Priority ?? 0;
+    return `
     <tr>
-      <td><strong>${task.Title || task.title || "Untitled"}</strong></td>
-      <td>${task.ProjectName || task.projectName || "N/A"}</td>
-      <td>${task.AssignedToName || task.assignedToName || "Unassigned"}</td>
+      <td><strong>${utils.escapeHtml(task.Title || task.title || "Untitled")}</strong></td>
+      <td>${utils.escapeHtml(task.ProjectName || task.projectName || "N/A")}</td>
+      <td>${utils.escapeHtml(task.AssignedToName || task.assignedToName || "Unassigned")}</td>
       <td>${utils.getStatusBadge(statusId)}</td>
       <td>${utils.getPriorityBadge(priorityId)}</td>
       <td>${utils.formatDate(task.DueDate || task.dueDate)}</td>
@@ -96,35 +216,56 @@ function renderTasks() {
           </button>
         </div>
       </td>
-    </tr>
-  `;
-    })
-    .join("");
+    </tr>`;
+  }).join("");
 }
 
-function setupEventListeners() {
-  document.getElementById("taskForm").addEventListener("submit", handleSubmit);
-  document
-    .getElementById("searchInput")
-    .addEventListener("input", handleSearch);
+// --- Status Dropdown ---
+
+function updateStatusDropdown(selectId, isEdit, currentStatusId) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  if (!isEdit) {
+    select.innerHTML = '<option value="0">Pending</option>';
+    return;
+  }
+  const statusLabels = {0: "Pending", 1: "In Progress", 2: "In Review", 3: "Completed", 4: "Closed"};
+  let options = [{value: parseInt(currentStatusId), label: statusLabels[currentStatusId] || "Unknown"}];
+  switch (parseInt(currentStatusId)) {
+    case 0: options.push({value: 1, label: "In Progress"}); break;
+    case 1: options.push({value: 2, label: "In Review"}); options.push({value: 4, label: "Closed"}); break;
+    case 2: options.push({value: 3, label: "Completed"}); options.push({value: 1, label: "In Progress"}); break;
+  }
+  const seen = new Set();
+  const unique = options.filter(o => { if (seen.has(o.value)) return false; seen.add(o.value); return true; });
+  select.innerHTML = unique.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
 }
 
-function handleSearch(e) {
-  const searchTerm = e.target.value.toLowerCase();
-  const rows = document.querySelectorAll("#tasksBody tr");
-
-  rows.forEach((row) => {
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(searchTerm) ? "" : "none";
-  });
-}
+// --- Modal ---
 
 function showCreateModal() {
   currentEditId = null;
+  currentDeptType = null;
   document.getElementById("modalTitle").textContent = "Create Task";
   document.getElementById("taskForm").reset();
   clearFormErrors(document.getElementById("taskForm"));
   document.getElementById("taskId").value = "";
+  document.getElementById("deptId").value = "";
+
+  updateStatusDropdown("status", false, 0);
+  updateStatusDropdown("salesStatus", false, 0);
+  updateStatusDropdown("mgmtStatus", false, 0);
+
+  document.getElementById("deptFields").style.display = "none";
+  document.getElementById("creativeFields").style.display = "none";
+  document.getElementById("salesFields").style.display = "none";
+  document.getElementById("mgmtFields").style.display = "none";
+  disableRequiredInSection(document.getElementById("creativeFields"));
+  disableRequiredInSection(document.getElementById("salesFields"));
+  disableRequiredInSection(document.getElementById("mgmtFields"));
+
+  // Reset employee dropdown (populated when dept is selected)
+  document.getElementById("assignedToId").innerHTML = '<option value="">Select Employee</option>';
   document.getElementById("taskModal").classList.remove("d-none");
 }
 
@@ -132,12 +273,12 @@ function closeModal() {
   document.getElementById("taskModal").classList.add("d-none");
   document.getElementById("taskForm").reset();
   currentEditId = null;
+  currentDeptType = null;
 }
 
 async function editTask(id) {
   const task = tasks.find((t) => (t.taskId || t.TaskId || t.Id) == id);
   if (!task) return;
-  // Ensure we have the full task DTO (Description and drive links may be present only on detail endpoint)
   try {
     const full = await API.Tasks.getById(id).catch(() => null);
     if (full) Object.assign(task, full);
@@ -148,52 +289,112 @@ async function editTask(id) {
   currentEditId = id;
   document.getElementById("modalTitle").textContent = "Edit Task";
   document.getElementById("taskId").value = id;
-  // Use detail DTO fields (PascalCase from API.Tasks.getById)
+
+  // Set title & description
   document.getElementById("title").value = task.Title || "";
   document.getElementById("description").value = task.Description || "";
-  document.getElementById("projectId").value = task.ProjectId || "";
-  document.getElementById("assignedToId").value = task.AssignedTo || "";
-  
-  const sId = task.StatusId !== undefined ? task.StatusId : (task.statusId !== undefined ? task.statusId : 0);
-  document.getElementById("status").value = sId;
 
-  const pId = task.PriorityId !== undefined ? task.PriorityId : (task.priorityId !== undefined ? task.priorityId : 1);
-  document.getElementById("priority").value = pId;
+  // Set department and trigger dept-specific fields + employee filter
+  const deptId = task.DeptId || task.deptId || 1;
+  document.getElementById("deptId").value = deptId;
+  onDeptSelected();
 
-  document.getElementById("driveUploadLink").value = task.DriveFolderLink || "";
-  document.getElementById("driveMaterialLink").value =
-    task.MaterialDriveFolderLink || "";
+  // Set employee value (ensure the assignee is in the filtered dropdown)
+  const empSelect = document.getElementById("assignedToId");
+  const assignedTo = task.AssignedTo || "";
+  if (assignedTo && !empSelect.querySelector(`option[value="${assignedTo}"]`)) {
+    const empName = task.AssignedToName || "Unknown";
+    empSelect.insertAdjacentHTML('beforeend', `<option value="${assignedTo}">${empName}</option>`);
+  }
+  empSelect.value = assignedTo;
 
-  if (task.DueDate) {
-    const date = new Date(task.DueDate);
-    document.getElementById("dueDate").value = date.toISOString().split("T")[0];
+  const sId = task.StatusId !== undefined ? task.StatusId : (task.statusId ?? 0);
+  const pId = task.PriorityId !== undefined ? task.PriorityId : (task.priorityId ?? 1);
+  const dateStr = task.DueDate ? String(task.DueDate).substring(0, 10) : "";
+
+  if (currentDeptType === "creative") {
+    updateStatusDropdown("status", true, sId);
+    document.getElementById("status").value = sId;
+    document.getElementById("priority").value = pId;
+    document.getElementById("dueDate").value = dateStr;
+    document.getElementById("projectId").value = task.ProjectId || "";
+    const upLink = document.getElementById("driveUploadLink");
+    if (upLink) upLink.value = task.DriveFolderLink || "";
+    const matLink = document.getElementById("driveMaterialLink");
+    if (matLink) matLink.value = task.MaterialDriveFolderLink || "";
+  } else if (currentDeptType === "sales") {
+    updateStatusDropdown("salesStatus", true, sId);
+    document.getElementById("salesStatus").value = sId;
+    document.getElementById("salesPriority").value = pId;
+    document.getElementById("salesDueDate").value = dateStr;
+    const actType = document.getElementById("salesActivityType");
+    if (actType) actType.value = task.SalesActivityType !== undefined && task.SalesActivityType !== null ? task.SalesActivityType : "";
+    const clientInfo = document.getElementById("salesClientInfo");
+    if (clientInfo) clientInfo.value = task.SalesClientInfo || "";
+    const segId = document.getElementById("salesMarketSegmentId");
+    if (segId) segId.value = task.SalesMarketSegmentId || "";
+  } else if (currentDeptType === "mgmt") {
+    updateStatusDropdown("mgmtStatus", true, sId);
+    document.getElementById("mgmtStatus").value = sId;
+    document.getElementById("mgmtPriority").value = pId;
+    document.getElementById("mgmtDueDate").value = dateStr;
   }
 
   document.getElementById("taskModal").classList.remove("d-none");
 }
 
+// --- Submit ---
+
 async function handleSubmit(e) {
   e.preventDefault();
   clearFormErrors(document.getElementById("taskForm"));
-  const statusVal = parseInt(document.getElementById("status").value);
-  const priorityVal = parseInt(document.getElementById("priority").value);
+
+  let statusVal, priorityVal, dueDateInput;
+  if (currentDeptType === "sales") {
+    statusVal = parseInt(document.getElementById("salesStatus").value);
+    priorityVal = parseInt(document.getElementById("salesPriority").value);
+    dueDateInput = document.getElementById("salesDueDate").value || null;
+  } else if (currentDeptType === "mgmt") {
+    statusVal = parseInt(document.getElementById("mgmtStatus").value);
+    priorityVal = parseInt(document.getElementById("mgmtPriority").value);
+    dueDateInput = document.getElementById("mgmtDueDate").value || null;
+  } else {
+    statusVal = parseInt(document.getElementById("status").value);
+    priorityVal = parseInt(document.getElementById("priority").value);
+    dueDateInput = document.getElementById("dueDate").value || null;
+  }
 
   const formData = {
     title: document.getElementById("title").value,
     description: document.getElementById("description").value || null,
-    projectId: parseInt(document.getElementById("projectId").value) || null,
     assignedTo: parseInt(document.getElementById("assignedToId").value) || null,
     statusId: !isNaN(statusVal) ? statusVal : 0,
     priorityId: !isNaN(priorityVal) ? priorityVal : 1,
-    dueDate: document.getElementById("dueDate").value || null,
-    driveFolderLink: document.getElementById("driveUploadLink").value || null,
-    materialDriveFolderLink:
-      document.getElementById("driveMaterialLink").value || null,
+    dueDate: dueDateInput,
+    deptId: parseInt(document.getElementById("deptId").value) || 1,
+    specificTime: null,
+    estimatedHours: null,
+    tags: null,
+    projectId: currentDeptType === "creative" ? (parseInt(document.getElementById("projectId").value) || null) : null,
+    driveFolderLink: currentDeptType === "creative" ? (document.getElementById("driveUploadLink")?.value || null) : "N/A",
+    materialDriveFolderLink: currentDeptType === "creative" ? (document.getElementById("driveMaterialLink")?.value || null) : null,
+    salesActivityType: currentDeptType === "sales" && document.getElementById("salesActivityType")?.value !== "" ? parseInt(document.getElementById("salesActivityType").value) : null,
+    salesClientInfo: currentDeptType === "sales" ? (document.getElementById("salesClientInfo")?.value || null) : null,
+    salesMarketSegmentId: currentDeptType === "sales" && document.getElementById("salesMarketSegmentId")?.value ? parseInt(document.getElementById("salesMarketSegmentId").value) : null,
   };
+
+  if (dueDateInput) {
+    const selectedDate = new Date(dueDateInput);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      utils.showError("Due date cannot be in the past");
+      return;
+    }
+  }
 
   try {
     utils.showLoading();
-
     if (currentEditId) {
       await API.Tasks.update(currentEditId, formData);
       utils.showSuccess("Task updated successfully");
@@ -201,7 +402,6 @@ async function handleSubmit(e) {
       await API.Tasks.create(formData);
       utils.showSuccess("Task created successfully");
     }
-
     closeModal();
     await loadData();
   } catch (error) {
@@ -221,29 +421,34 @@ async function handleSubmit(e) {
   }
 }
 
-// --- Form error helpers (same logic as manager tasks) ---
+// --- Event Listeners ---
+
+function setupEventListeners() {
+  document.getElementById("taskForm").addEventListener("submit", handleSubmit);
+  document.getElementById("searchInput").addEventListener("input", handleSearch);
+}
+
+function handleSearch(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  document.querySelectorAll("#tasksBody tr").forEach((row) => {
+    row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? "" : "none";
+  });
+}
+
+// --- Form Error Helpers ---
+
 function clearFormErrors(form) {
   if (!form) return;
-  form
-    .querySelectorAll(".is-invalid")
-    .forEach((el) => el.classList.remove("is-invalid"));
-  form.querySelectorAll(".invalid-feedback").forEach((el) => el.remove());
+  form.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+  form.querySelectorAll(".invalid-feedback").forEach(el => el.remove());
 }
 
 function applyFieldErrors(form, fieldErrors) {
   if (!form || !fieldErrors) return;
   let firstEl = null;
   Object.keys(fieldErrors).forEach((field) => {
-    const msg = Array.isArray(fieldErrors[field])
-      ? fieldErrors[field].join(", ")
-      : fieldErrors[field];
-    const candidates = [
-      field,
-      field.charAt(0).toLowerCase() + field.slice(1),
-      field.toLowerCase(),
-      field + "Id",
-      field.replace(/Id$/i, ""),
-    ];
+    const msg = Array.isArray(fieldErrors[field]) ? fieldErrors[field].join(", ") : fieldErrors[field];
+    const candidates = [field, field.charAt(0).toLowerCase() + field.slice(1), field.toLowerCase(), field + "Id", field.replace(/Id$/i, "")];
     let el = null;
     for (const c of candidates) {
       el = form.querySelector(`#${c}`) || form.querySelector(`[name="${c}"]`);
@@ -264,36 +469,24 @@ function tryApplyFieldErrors(error, form) {
   try {
     if (!error || !error.message) return false;
     let content = error.message.replace(/^HTTP\s*\d+\s*:\s*/i, "").trim();
-    if (
-      (content.startsWith('"') && content.endsWith('"')) ||
-      (content.startsWith("'") && content.endsWith("'"))
-    ) {
+    if ((content.startsWith('"') && content.endsWith('"')) || (content.startsWith("'") && content.endsWith("'"))) {
       content = content.slice(1, -1);
     }
     let parsed = null;
-    try {
-      parsed = JSON.parse(content);
-    } catch (e) {
-      parsed = null;
-    }
+    try { parsed = JSON.parse(content); } catch (e) { parsed = null; }
     if (parsed) {
-      if (parsed.errors) {
-        applyFieldErrors(form, parsed.errors);
-        return true;
-      }
+      if (parsed.errors) { applyFieldErrors(form, parsed.errors); return true; }
       applyFieldErrors(form, parsed);
       return true;
     }
     return false;
-  } catch (e) {
-    return false;
-  }
+  } catch (e) { return false; }
 }
 
-async function deleteTask(id) {
-  if (!utils.confirmAction("Are you sure you want to delete this task?"))
-    return;
+// --- Delete ---
 
+async function deleteTask(id) {
+  if (!utils.confirmAction("Are you sure you want to delete this task?")) return;
   try {
     utils.showLoading();
     await API.Tasks.delete(id);

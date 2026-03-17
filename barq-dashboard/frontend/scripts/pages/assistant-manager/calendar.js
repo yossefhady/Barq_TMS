@@ -55,12 +55,12 @@ async function populateUserFilter() {
         // Find subordinates (Direct + 2nd Level for Team Leaders)
         // Direct
         const directSubordinates = users.filter(u => (u.TeamLeaderId || u.teamLeaderId) == myId);
-        const directIds = directSubordinates.map(u => u.UserId || u.userId);
-        
+        const directIds = directSubordinates.map(u => Number(u.UserId || u.userId));
+
         // 2nd Level (Subordinates of my subordinates)
         const secondLevelSubordinates = users.filter(u => {
-            const supId = u.TeamLeaderId || u.teamLeaderId;
-            return directIds.includes(supId);
+            const supId = Number(u.TeamLeaderId || u.teamLeaderId);
+            return supId && directIds.includes(supId);
         });
         
         const team = [...directSubordinates, ...secondLevelSubordinates];
@@ -499,7 +499,7 @@ async function openTaskDetails(taskItem) {
 }
 
 async function deleteTask(taskId) {
-  if (!confirm("Are you sure you want to delete this task?")) return;
+  if (!utils.confirmAction("Are you sure you want to delete this task?")) return;
 
   try {
     utils.showLoading();

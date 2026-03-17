@@ -15,6 +15,11 @@ class NotificationService {
   // Initialize polling and perform initial load
   async initialize() {
     try {
+      if (!auth.isAuthenticated()) {
+        console.warn("[Notifications] Not authenticated, skipping init");
+        return;
+      }
+
       const currentUser = auth.getCurrentUser();
       if (!currentUser) {
         console.warn("[Notifications] No authenticated user, skipping init");
@@ -24,7 +29,7 @@ class NotificationService {
       // Load initial unread list and set seen IDs
       const unread = await this.fetchUnreadList(currentUser.UserId);
       (unread || []).forEach((n) =>
-        this.lastSeenIds.add(n.notifId || n.notifId || n.notifId)
+        this.lastSeenIds.add(n.NotifId ?? n.notifId ?? n.NotificationId)
       );
 
       // Update badge immediately
@@ -55,6 +60,13 @@ class NotificationService {
 
   async poll() {
     try {
+      // Check token validity before making API calls to prevent 401 redirect loops
+      if (!auth.isAuthenticated()) {
+        console.warn("[Notifications] Token expired, stopping polling");
+        this.stopPolling();
+        return;
+      }
+
       const currentUser = auth.getCurrentUser();
       if (!currentUser) return;
 
@@ -63,7 +75,7 @@ class NotificationService {
 
       // Detect new notifications by comparing notif ids
       const newOnes = (unread || []).filter((n) => {
-        const id = n.notifId ?? n.notifId ?? n.notifId;
+        const id = n.NotifId ?? n.notifId ?? n.NotificationId;
         return id != null && !this.lastSeenIds.has(id);
       });
 
@@ -71,7 +83,7 @@ class NotificationService {
         newOnes.forEach((n) => {
           this.showToastFromDto(n);
           this.triggerCallbacks("onReceive", n);
-          const id = n.notifId ?? n.notifId ?? n.notifId;
+          const id = n.NotifId ?? n.notifId ?? n.NotificationId;
           if (id != null) this.lastSeenIds.add(id);
         });
         await this.updateNotificationBadge();
@@ -84,13 +96,21 @@ class NotificationService {
 
   async fetchUnreadList(userId) {
     try {
-      const res = await API.Notifications.getUnread(userId);
+      // Use a direct fetch with skipRedirectOn401 to prevent page navigation during polling
+      const client = new APIClient();
+      const res = await client.get(`/Notifications/user/${userId}/unread`, { skipRedirectOn401: true });
       // API may return an object with data or an array directly
       if (Array.isArray(res)) return res;
       if (res && Array.isArray(res.items)) return res.items;
       return res || [];
     } catch (err) {
-      console.error("[Notifications] fetchUnreadList failed:", err);
+      // If we get a 401, stop polling gracefully instead of letting it redirect
+      if (err && err.message && err.message.includes("401")) {
+        console.warn("[Notifications] Auth expired during poll, stopping");
+        this.stopPolling();
+      } else {
+        console.error("[Notifications] fetchUnreadList failed:", err);
+      }
       return [];
     }
   }
@@ -98,9 +118,12 @@ class NotificationService {
   // Update notification badge count using API
   async updateNotificationBadge() {
     try {
+      if (!auth.isAuthenticated()) return;
+
       const currentUser = auth.getCurrentUser();
       if (!currentUser) return;
-      const res = await API.Notifications.getUnreadCount(currentUser.UserId);
+      const client = new APIClient();
+      const res = await client.get(`/Notifications/user/${currentUser.UserId}/count/unread`, { skipRedirectOn401: true });
       const count =
         res?.count ?? res?.Count ?? (typeof res === "number" ? res : 0);
 
@@ -171,9 +194,9 @@ class NotificationService {
       toast.className = "notification-toast";
 
       const title =
-        dto.taskTitle || dto.projectName || dto.message || "Notification";
-      const message = dto.message ?? dto.Message ?? "";
-      const time = dto.createdAt ?? dto.CreatedAt ?? new Date();
+        dto.TaskTitle || dto.taskTitle || dto.ProjectName || dto.projectName || dto.Message || dto.message || "Notification";
+      const message = dto.Message ?? dto.message ?? "";
+      const time = dto.CreatedAt ?? dto.createdAt ?? new Date();
 
       const icon = this.getNotificationIcon(dto.type || dto.Type || "info");
 
@@ -204,12 +227,14 @@ class NotificationService {
 
       toast.addEventListener("click", (e) => {
         e.stopPropagation();
-        const id = dto.notifId ?? dto.notifId;
+        const id = dto.NotifId ?? dto.notifId ?? dto.NotificationId;
         if (id) this.markAsRead(id);
-        if (dto.taskId) {
-          window.location.href = `./tasks/view.html?id=${dto.taskId}`;
-        } else if (dto.projectId) {
-          window.location.href = `./projects/view.html?id=${dto.projectId}`;
+        const taskId = dto.TaskId ?? dto.taskId;
+        const projectId = dto.ProjectId ?? dto.projectId;
+        if (taskId) {
+          window.location.href = `./tasks/view.html?id=${taskId}`;
+        } else if (projectId) {
+          window.location.href = `./projects/view.html?id=${projectId}`;
         }
       });
 

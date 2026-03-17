@@ -15,6 +15,9 @@ let currentEditId = null; // reused if we eventually allow editing self tasks
 // Initialize
 document.addEventListener("DOMContentLoaded", async () => {
   currentUser = auth.getCurrentUser();
+  if (currentUser && currentUser.UserId === undefined && currentUser.userId !== undefined) {
+    currentUser.UserId = currentUser.userId;
+  }
   await loadData();
   await loadSalesTargets(); // Load sales targets if applicable
 });
@@ -165,10 +168,11 @@ async function loadData() {
     }
 
     // Filter employees (Role 5) who are in this team leader's team
+    const currentUserId = Number(currentUser.UserId || currentUser.userId);
     employees = usersResponse.filter((u) => {
       const roleId = u.Role || u.RoleId || u.role;
       const teamLeaderId = u.TeamLeaderId || u.teamLeaderId;
-      return roleId === 5 && teamLeaderId === currentUser.UserId;
+      return Number(roleId) === 5 && Number(teamLeaderId) === currentUserId;
     });
 
     updateStats();
@@ -380,19 +384,19 @@ function renderTasks() {
           const act = (task.SalesActivityType && activityMap[task.SalesActivityType]) 
                     ? activityMap[task.SalesActivityType] 
                     : '<span style="color:var(--text-secondary)">-</span>';
-          const client = task.SalesClientInfo || '<span style="color:var(--text-secondary)">-</span>';
-          
+          const client = task.SalesClientInfo ? utils.escapeHtml(task.SalesClientInfo) : '<span style="color:var(--text-secondary)">-</span>';
+
           middleCols = `
             <td>${act}</td>
             <td>${client}</td>
           `;
       } else {
-        middleCols = `<td>${task.ProjectName || "N/A"}</td>`;
+        middleCols = `<td>${utils.escapeHtml(task.ProjectName || "N/A")}</td>`;
       }
 
       return `
     <tr style="${needsReview ? "border-left: 4px solid #ff9800;" : ""}">
-      <td><strong>${task.Title || "Untitled Task"}</strong>${
+      <td><strong>${utils.escapeHtml(task.Title || "Untitled Task")}</strong>${
         needsReview
           ? '<span class="badge badge-warning" style="margin-left: 8px;">Needs Review</span>'
           : ""
@@ -404,7 +408,7 @@ function renderTasks() {
       ${middleCols}
       <td>${utils.getPriorityBadge(task.PriorityId !== undefined ? task.PriorityId : 1)}</td>
       <td>${utils.getStatusBadge(sId)}</td>
-      <td>${task.AssignedToName || "Unassigned"}</td>
+      <td>${utils.escapeHtml(task.AssignedToName || "Unassigned")}</td>
       <td>${utils.formatDate(task.DueDate)}</td>
       <td>
         <button class="btn btn-sm btn-primary" onclick="openTaskDetailsModal(${
@@ -472,9 +476,9 @@ function showPassTaskModal(taskId) {
       employees
         .map(
           (emp) => `
-        <option value="${emp.UserId || emp.userId}">${
+        <option value="${emp.UserId || emp.userId}">${utils.escapeHtml(
             emp.Name || emp.name
-          }</option>
+          )}</option>
       `
         )
         .join("");
@@ -659,7 +663,7 @@ async function openReviewModal(taskId) {
     const uploadHref = task.DriveFolderLink || null;
     if (uploadHref && !isSalesTeamLeader) {
       uploadLinkGroup.style.display = "block";
-      document.getElementById("reviewUploadLink").href = uploadHref;
+      document.getElementById("reviewUploadLink").href = utils.sanitizeUrl(uploadHref);
     } else {
       uploadLinkGroup.style.display = "none";
     }
@@ -781,13 +785,6 @@ async function openTaskDetailsModal(taskId) {
               showCreateSelfTaskModal(task);
           };
           footerActions.appendChild(editBtn);
-
-          const deleteBtn = document.createElement("button");
-          deleteBtn.className = "btn btn-danger";
-          deleteBtn.style.marginLeft = "10px";
-          deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
-          deleteBtn.onclick = () => deleteTask(task.TaskId);
-          footerActions.appendChild(deleteBtn);
        }
     }
 
@@ -801,20 +798,7 @@ async function openTaskDetailsModal(taskId) {
 }
 
 async function deleteTask(taskId) {
-  if (!confirm("Are you sure you want to delete this task?")) return;
-
-  try {
-    utils.showLoading();
-    await API.Tasks.delete(taskId);
-    utils.showSuccess("Task deleted successfully");
-    closeTaskDetailsModal();
-    await loadData();
-  } catch (error) {
-    console.error("Error deleting task:", error);
-    utils.showError(error.message || "Failed to delete task");
-  } finally {
-    utils.hideLoading();
-  }
+  utils.showError("Deleting tasks is not allowed for Team Leaders.");
 }
 
 function renderTaskDetails(task) {
@@ -834,17 +818,17 @@ function renderTaskDetails(task) {
     <div class="details-grid" style="margin-bottom: var(--space-4);">
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-heading"></i> Task Title</label>
-        <div class="detail-value">${task.Title || "Untitled Task"}</div>
+        <div class="detail-value">${utils.escapeHtml(task.Title || "Untitled Task")}</div>
       </div>
-      
+
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-align-left"></i> Description</label>
-        <div class="detail-value">${task.Description || "No description"}</div>
+        <div class="detail-value">${utils.escapeHtml(task.Description || "No description")}</div>
       </div>
 
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-user"></i> Assigned To</label>
-        <div class="detail-value">${task.AssignedToName || "Unassigned"}</div>
+        <div class="detail-value">${utils.escapeHtml(task.AssignedToName || "Unassigned")}</div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-flag"></i> Priority</label>
@@ -857,15 +841,15 @@ function renderTaskDetails(task) {
       ${!isSalesTeamLeader ? `
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-folder"></i> Project</label>
-        <div class="detail-value">${task.ProjectName || "N/A"}</div>
+        <div class="detail-value">${utils.escapeHtml(task.ProjectName || "N/A")}</div>
       </div>` : `
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-user-tie"></i> Client Info</label>
-        <div class="detail-value">${task.SalesClientInfo || "-"}</div>
+        <div class="detail-value">${utils.escapeHtml(task.SalesClientInfo || "-")}</div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-location-dot"></i> Location</label>
-        <div class="detail-value">${task.SalesMarketSegmentPlace || task.salesMarketSegmentPlace || "-"}</div>
+        <div class="detail-value">${utils.escapeHtml(task.SalesMarketSegmentPlace || task.salesMarketSegmentPlace || "-")}</div>
       </div>
       <div class="detail-item">
           <label class="detail-label"><i class="fa-solid fa-list-check"></i> Activity Type</label>
@@ -879,7 +863,7 @@ function renderTaskDetails(task) {
       `}
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-user-pen"></i> Created By</label>
-        <div class="detail-value">${task.CreatedByName || "Unknown"}</div>
+        <div class="detail-value">${utils.escapeHtml(task.CreatedByName || "Unknown")}</div>
       </div>
       <div class="detail-item">
         <label class="detail-label"><i class="fa-solid fa-calendar"></i> Due Date</label>
@@ -894,10 +878,10 @@ function renderTaskDetails(task) {
           ${task.Comments.map(c => `
              <div style="margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px;">
                  <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="color: var(--text-primary); font-weight: 600;">${c.UserName}</span>
+                    <span style="color: var(--text-primary); font-weight: 600;">${utils.escapeHtml(c.UserName)}</span>
                     <small style="color: var(--text-secondary);">${utils.formatDate(c.CreatedAt)}</small>
                  </div>
-                 <div style="color: var(--text-secondary); line-height: 1.4;">${c.Comment}</div>
+                 <div style="color: var(--text-secondary); line-height: 1.4;">${utils.escapeHtml(c.Comment)}</div>
              </div>
           `).join('')}
         </div>
@@ -908,12 +892,12 @@ function renderTaskDetails(task) {
       <label class="detail-label"><i class="fa-solid fa-link"></i> Resources</label>
       <div class="detail-value" style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
         ${driveFolderLink ? `
-        <a href="${driveFolderLink}" target="_blank" class="btn btn-primary" style="text-decoration: none; flex: 1;">
+        <a href="${utils.sanitizeUrl(driveFolderLink)}" target="_blank" class="btn btn-primary" style="text-decoration: none; flex: 1;">
           <i class="fa-brands fa-google-drive"></i> Open Task Folder
         </a>
         ` : ''}
         ${materialDriveFolderLink ? `
-        <a href="${materialDriveFolderLink}" target="_blank" class="btn btn-secondary" style="text-decoration: none; flex: 1;">
+        <a href="${utils.sanitizeUrl(materialDriveFolderLink)}" target="_blank" class="btn btn-secondary" style="text-decoration: none; flex: 1;">
           <i class="fa-solid fa-folder-open"></i> Open Material Folder
         </a>
         ` : ''}
@@ -1006,6 +990,52 @@ function populateDropdowns() {
     // but we can ensure they are enabled.
 }
 
+// Restrict status dropdown options based on state machine transitions.
+// isEdit=false (create): only show Pending.
+// isEdit=true  (edit):   show current status + valid next states.
+function updateStatusDropdown(isEdit, currentStatusId) {
+  const statusSelect = document.getElementById("statusId");
+  statusSelect.innerHTML = '';
+
+  // Fallback labels in case the statuses array is empty
+  const statusLabels = {
+    0: 'Pending',
+    1: 'In Progress',
+    2: 'In Review',
+    3: 'Completed',
+    4: 'Closed'
+  };
+
+  // Valid state-machine transitions
+  const validTransitions = {
+    0: [1],        // Pending     → InProgress
+    1: [2, 4],     // InProgress  → InReview, Closed
+    2: [3, 1],     // InReview    → Completed, InProgress (reject back)
+    3: [],         // Completed   → (terminal)
+    4: []          // Closed      → (terminal)
+  };
+
+  let allowedIds;
+  if (!isEdit) {
+    allowedIds = [0]; // create mode – only Pending
+  } else {
+    const nextStates = validTransitions[currentStatusId] || [];
+    allowedIds = [currentStatusId, ...nextStates];
+  }
+
+  allowedIds.forEach(id => {
+    const option = document.createElement("option");
+    option.value = id;
+    const statusObj = statuses.find(s => (s.StatusId !== undefined ? s.StatusId : s.statusId) === id);
+    option.textContent = statusObj
+      ? (statusObj.StatusName || statusObj.statusName)
+      : (statusLabels[id] || 'Unknown');
+    statusSelect.appendChild(option);
+  });
+
+  statusSelect.value = currentStatusId;
+}
+
 // Show Create/Edit Modal
 function showCreateSelfTaskModal(editTask = null) {
   document.getElementById("taskForm").reset();
@@ -1017,9 +1047,8 @@ function showCreateSelfTaskModal(editTask = null) {
       document.getElementById("description").value = editTask.Description || "";
       document.getElementById("projectId").value = editTask.ProjectId || "";
       document.getElementById("deptId").value = editTask.DeptId || editTask.DepartmentId || "";
-      document.getElementById("statusId").value = editTask.StatusId !== undefined ? editTask.StatusId : 1;
       document.getElementById("priorityId").value = editTask.PriorityId !== undefined ? editTask.PriorityId : "";
-      
+
       if(editTask.DueDate) {
           document.getElementById("dueDate").value = editTask.DueDate.split('T')[0];
       }
@@ -1031,13 +1060,20 @@ function showCreateSelfTaskModal(editTask = null) {
   } else {
       currentEditId = null;
       document.getElementById("modalTitle").textContent = "Create Self Task";
-      document.getElementById("statusId").value = "1"; // Default In Progress
       document.getElementById("assignedToId").value = currentUser.UserId;
   }
   
   // Populate dropdowns fresh
   populateDropdowns();
-  
+
+  // Restrict status dropdown based on state machine transitions
+  if (editTask) {
+    const currentStatusId = editTask.StatusId !== undefined ? editTask.StatusId : (editTask.statusId !== undefined ? editTask.statusId : 0);
+    updateStatusDropdown(true, currentStatusId);
+  } else {
+    updateStatusDropdown(false, 0);
+  }
+
   // If editing, re-set values after populate (in case dropdowns cleared them)
   if(editTask) {
        document.getElementById("deptId").value = editTask.DeptId || editTask.DepartmentId || "";
@@ -1255,4 +1291,3 @@ async function loadSalesZones(selectId, selectedValue = null) {
         select.innerHTML = '<option value="">Error loading zones</option>';
     }
 }
-

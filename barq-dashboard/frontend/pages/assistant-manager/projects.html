@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -28,70 +28,42 @@
         <nav class="sidebar-nav">
           <div class="nav-section">
             <a href="dashboard.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-gauge"></i
-              ></span>
-              <span class="nav-item-text"
-                >Dashboard</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-gauge"></i></span>
+              <span class="nav-item-text">Dashboard</span>
             </a>
             <a href="tasks.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-list-check"></i
-              ></span>
+              <span class="nav-item-icon"><i class="fa-solid fa-list-check"></i></span>
               <span class="nav-item-text">Tasks</span>
             </a>
             <a href="projects.html" class="nav-item active">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-folder-open"></i
-              ></span>
-              <span class="nav-item-text"
-                >Projects</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-folder-open"></i></span>
+              <span class="nav-item-text">Projects</span>
             </a>
             <a href="clients.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-handshake"></i
-              ></span>
+              <span class="nav-item-icon"><i class="fa-solid fa-handshake"></i></span>
               <span class="nav-item-text">Clients</span>
             </a>
             <a href="targets.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-bullseye"></i
-              ></span>
+              <span class="nav-item-icon"><i class="fa-solid fa-bullseye"></i></span>
               <span class="nav-item-text">Sales Targets</span>
             </a>
             <a href="calendar.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-calendar"></i
-              ></span>
-              <span class="nav-item-text"
-                >Calendar</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-calendar"></i></span>
+              <span class="nav-item-text">Calendar</span>
             </a>
             <a href="analytics.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-chart-line"></i
-              ></span>
-              <span class="nav-item-text"
-                >Analytics</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-chart-line"></i></span>
+              <span class="nav-item-text">Analytics</span>
             </a>
           </div>
           <div class="nav-section">
             <div class="nav-section-title">Settings</div>
             <a href="settings.html" class="nav-item">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-gear"></i
-              ></span>
-              <span class="nav-item-text"
-                >Settings</span
-              >
+              <span class="nav-item-icon"><i class="fa-solid fa-gear"></i></span>
+              <span class="nav-item-text">Settings</span>
             </a>
             <a href="#" class="nav-item" onclick="auth.logout(); return false;">
-              <span class="nav-item-icon"
-                ><i class="fa-solid fa-right-from-bracket"></i
-              ></span>
+              <span class="nav-item-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
               <span class="nav-item-text">Logout</span>
             </a>
           </div>
@@ -114,9 +86,7 @@
               <i class="fa-solid fa-bars"></i>
             </button>
             <div class="search-bar">
-              <span class="search-icon"
-                ><i class="fa-solid fa-magnifying-glass"></i
-              ></span>
+              <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
               <input
                 type="text"
                 class="search-input"
@@ -148,9 +118,31 @@
           <div class="card">
             <div class="card-header">
               <h3>All Projects</h3>
-              <button class="btn btn-primary" onclick="showCreateModal()">
-                <i class="fa-solid fa-plus"></i> Create Project
-              </button>
+              <div class="table-actions-toolbar">
+                 <div class="filter-wrapper">
+                   <div class="filter-item">
+                     <i class="fa-solid fa-filter"></i>
+                     <select id="filterColumn" class="form-control">
+                       <option value="">Filter By...</option>
+                       <option value="ClientName">Client</option>
+                       <option value="TeamLeaderName">Team Leader</option>
+                       <option value="StatusInt">Status</option>
+                       <option value="StartDate">Start Date</option>
+                       <option value="EndDate">End Date</option>
+                     </select>
+                   </div>
+                   <div class="filter-item">
+                     <i class="fa-solid fa-list-ul"></i>
+                     <select id="filterValue" class="form-control" disabled>
+                       <option value="">All</option>
+                     </select>
+                   </div>
+                 </div>
+                 <button class="btn btn-primary" onclick="showCreateModal()">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Create Project</span>
+                 </button>
+              </div>
             </div>
             <div class="card-body">
               <table class="table" id="projectsTable">
@@ -158,7 +150,8 @@
                   <tr>
                     <th>Name</th>
                     <th>Description</th>
-                    <th>Client</th>
+                    <th>Company</th>
+                    <th>Team Leaders</th>
                     <th>Tasks</th>
                     <th>Start Date</th>
                     <th>End Date</th>
@@ -168,7 +161,7 @@
                 </thead>
                 <tbody id="projectsBody">
                   <tr>
-                    <td colspan="8" class="text-center" style="padding: 40px">
+                    <td colspan="9" class="text-center" style="padding: 40px;">
                       <div class="spinner"></div>
                     </td>
                   </tr>
@@ -214,14 +207,21 @@
               </div>
               <div class="form-group">
                 <label for="clientId">Client *</label>
-                <select
-                  class="form-control"
-                  id="clientId"
-                  name="clientId"
-                  required
-                >
+                <select class="form-control" id="clientId" name="clientId" required>
                   <option value="">Select Client</option>
                 </select>
+              </div>
+              <div class="form-group">
+                <label for="teamLeaderId">Team Leaders</label>
+                <select
+                  class="form-control"
+                  id="teamLeaderId"
+                  name="teamLeaderId"
+                  multiple
+                  size="3"
+                >
+                </select>
+                <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple</small>
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date</label>
@@ -240,6 +240,15 @@
                   id="endDate"
                   name="endDate"
                 />
+              </div>
+              <div class="form-group" id="statusGroup" style="display: none;">
+                <label for="status">Status</label>
+                <select class="form-control" id="status" name="status">
+                  <option value="0">Planned</option>
+                  <option value="1">Active</option>
+                  <option value="2">Completed</option>
+                  <option value="3">On Hold</option>
+                </select>
               </div>
               <div class="form-actions">
                 <button

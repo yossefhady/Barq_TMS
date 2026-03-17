@@ -1,12 +1,17 @@
-// Manager Clients Page Script
-auth.requireRole([USER_ROLES.MANAGER]);
+// Shared Clients Page Script — used by both Manager and Assistant Manager
+// The calling page must set window.CLIENTS_PAGE_ROLES before loading this script.
+// e.g. window.CLIENTS_PAGE_ROLES = [USER_ROLES.MANAGER];
+auth.requireRole(window.CLIENTS_PAGE_ROLES);
 
 let allClients = [];
 let clients = [];
 let accountManagers = [];
-let clientUsers = []; // Users with Role 6 (Client)
+let clientUsers = [];
 let currentEditId = null;
 let currentFilter = { column: "", value: "" };
+
+// Filter event listeners - track to avoid duplicates
+let filterListenersAttached = false;
 
 const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
@@ -37,17 +42,14 @@ const COUNTRIES = [
 
 document.addEventListener("DOMContentLoaded", async () => {
   populateCountryDropdown();
-  await loadData();
   setupEventListeners();
+  await loadData();
 });
 
 function populateCountryDropdown() {
   const countrySelect = document.getElementById("country");
   if (!countrySelect) return;
-
-  // Keep the first option
   countrySelect.innerHTML = '<option value="">Select Country</option>';
-
   COUNTRIES.forEach(country => {
     const option = document.createElement("option");
     option.value = country;
@@ -60,18 +62,26 @@ async function loadData() {
   try {
     utils.showLoading();
 
-    // Fetch clients (Companies) from API
-    allClients = await API.Clients.getAll().catch(() => []);
+    // Fetch clients and users in parallel
+    // Try role-filtered endpoint first, fall back to fetching all users
+    const [clientsData, amUsers, clUsers] = await Promise.all([
+      API.Clients.getAll().catch(() => []),
+      API.Users.getByRole(USER_ROLES.ACCOUNT_MANAGER).catch(() => null),
+      API.Users.getByRole(USER_ROLES.CLIENT).catch(() => null)
+    ]);
+
+    allClients = clientsData;
     clients = [...allClients];
 
-    // Fetch all users to separate AccountManagers and Client Owners
-    const allUsers = await API.Users.getAll().catch(() => []);
-    
-    // Filter AccountManagers (Role 3)
-    accountManagers = allUsers.filter((user) => (user.RoleId || user.Role) === USER_ROLES.ACCOUNT_MANAGER);
-    
-    // Filter Client Users (Role 6) - Potential Owners
-    clientUsers = allUsers.filter((user) => (user.RoleId || user.Role) === 6);
+    // If role-filtered endpoints failed, fall back to getAll and filter client-side
+    if (amUsers === null || clUsers === null) {
+      const allUsers = await API.Users.getAll().catch(() => []);
+      accountManagers = amUsers ?? allUsers.filter(u => (u.RoleId ?? u.Role) === USER_ROLES.ACCOUNT_MANAGER);
+      clientUsers = clUsers ?? allUsers.filter(u => (u.RoleId ?? u.Role) === USER_ROLES.CLIENT);
+    } else {
+      accountManagers = amUsers;
+      clientUsers = clUsers;
+    }
 
     populateAccountManagerDropdown();
     populateOwnerDropdown();
@@ -86,72 +96,70 @@ async function loadData() {
 }
 
 function populateFilterDropdowns() {
-    const filterColumn = document.getElementById("filterColumn");
-    const filterValue = document.getElementById("filterValue");
-    
-    filterColumn.addEventListener("change", (e) => {
-        const column = e.target.value;
-        currentFilter.column = column;
-        currentFilter.value = "";
+  const filterColumn = document.getElementById("filterColumn");
+  const filterValue = document.getElementById("filterValue");
 
-        if (!column) {
-            filterValue.innerHTML = '<option value="">All</option>';
-            filterValue.disabled = true;
-            applyFilters();
-            return;
-        }
+  // Only attach listeners once to prevent memory leak
+  if (filterListenersAttached) return;
+  filterListenersAttached = true;
 
-        const uniqueValues = new Set();
-        allClients.forEach(cli => {
-            let val = cli[column] || cli[column.charAt(0).toLowerCase() + column.slice(1)];
-            if (val !== undefined && val !== null && val !== "") {
-                 uniqueValues.add(val);
-            }
-        });
+  filterColumn.addEventListener("change", (e) => {
+    const column = e.target.value;
+    currentFilter.column = column;
+    currentFilter.value = "";
 
-        const sortedValues = Array.from(uniqueValues).sort();
-        let optionsHtml = '<option value="">All</option>';
-        sortedValues.forEach(val => {
-             optionsHtml += `<option value="${val}">${val}</option>`;
-        });
+    if (!column) {
+      filterValue.innerHTML = '<option value="">All</option>';
+      filterValue.disabled = true;
+      applyFilters();
+      return;
+    }
 
-        filterValue.innerHTML = optionsHtml;
-        filterValue.disabled = false;
-        applyFilters();
+    const uniqueValues = new Set();
+    allClients.forEach(cli => {
+      const val = cli[column];
+      if (val !== undefined && val !== null && val !== "") {
+        uniqueValues.add(val);
+      }
     });
 
-    filterValue.addEventListener("change", (e) => {
-        currentFilter.value = e.target.value;
-        applyFilters();
+    const sortedValues = Array.from(uniqueValues).sort();
+    let optionsHtml = '<option value="">All</option>';
+    sortedValues.forEach(val => {
+      optionsHtml += `<option value="${utils.escapeHtml(val)}">${utils.escapeHtml(val)}</option>`;
     });
+
+    filterValue.innerHTML = optionsHtml;
+    filterValue.disabled = false;
+    applyFilters();
+  });
+
+  filterValue.addEventListener("change", (e) => {
+    currentFilter.value = e.target.value;
+    applyFilters();
+  });
 }
 
 function applyFilters() {
-    if (!currentFilter.column || currentFilter.value === "") {
-        clients = [...allClients];
-    } else {
-        clients = allClients.filter(cli => {
-            const column = currentFilter.column;
-            let val = cli[column] || cli[column.charAt(0).toLowerCase() + column.slice(1)];
-            return String(val) === String(currentFilter.value);
-        });
-    }
-    renderClients();
+  if (!currentFilter.column || currentFilter.value === "") {
+    clients = [...allClients];
+  } else {
+    clients = allClients.filter(cli => {
+      const val = cli[currentFilter.column];
+      return String(val ?? "") === String(currentFilter.value);
+    });
+  }
+  renderClients();
 }
 
 function populateAccountManagerDropdown() {
   const accountManagerSelect = document.getElementById("accountManager");
   if (!accountManagerSelect) return;
-
-  // Clear existing options except the first one
-  accountManagerSelect.innerHTML =
-    '<option value="">Select Account Manager</option>';
-
-  // Add account manager options
+  accountManagerSelect.innerHTML = '<option value="">Select Account Manager</option>';
   accountManagers.forEach((acc) => {
     const option = document.createElement("option");
-    option.value = acc.UserId || acc.userId;
-    option.textContent = acc.Name || acc.name || "Unknown";
+    option.value = acc.UserId;
+    option.textContent = acc.Name || "Unknown";
     accountManagerSelect.appendChild(option);
   });
 }
@@ -159,13 +167,11 @@ function populateAccountManagerDropdown() {
 function populateOwnerDropdown() {
   const ownerSelect = document.getElementById("existingOwner");
   if (!ownerSelect) return;
-
   ownerSelect.innerHTML = '<option value="">Select an existing client user...</option>';
-
   clientUsers.forEach((user) => {
     const option = document.createElement("option");
-    option.value = user.UserId || user.userId;
-    option.textContent = `${user.Name || user.name} (${user.Username || user.username})`;
+    option.value = user.UserId;
+    option.textContent = `${user.Name || "Unknown"} (${user.Username || ""})`;
     ownerSelect.appendChild(option);
   });
 }
@@ -176,7 +182,7 @@ function renderClients() {
   if (clients.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5" class="text-center" style="padding: 40px;">
+        <td colspan="7" class="text-center" style="padding: 40px;">
           <div class="empty-state">
             <i class="fa-solid fa-inbox"></i>
             <h3>No clients found</h3>
@@ -193,40 +199,34 @@ function renderClients() {
       (client) => `
     <tr>
       <td>
-        <div style="font-weight: 600; color: var(--text-main);">${client.name || client.Name || "Unknown"}</div>
-        <div style="font-size: 0.8em; color: var(--text-secondary);">${client.address || client.Address || ""}</div>
+        <div style="font-weight: 600; color: var(--text-main);">${utils.escapeHtml(client.Name || "Unknown")}</div>
+        <div style="font-size: 0.8em; color: var(--text-secondary);">${utils.escapeHtml(client.Address || "")}</div>
       </td>
       <td>
         <div style="display: flex; align-items: center; gap: 8px;">
           <div class="user-avatar small" style="width: 24px; height: 24px; font-size: 10px;">
-            ${(client.ownerName || client.OwnerName || "U").charAt(0)}
+            ${utils.escapeHtml((client.OwnerName || "U").charAt(0))}
           </div>
-          <span>${client.ownerName || client.OwnerName || "N/A"}</span>
+          <span>${utils.escapeHtml(client.OwnerName || "N/A")}</span>
         </div>
       </td>
       <td>
-        <div>${client.email || client.Email || "N/A"}</div>
-        <div style="font-size: 0.8em; color: var(--text-secondary);">${client.phoneNumber || client.PhoneNumber || ""}</div>
+        <div>${utils.escapeHtml(client.Email || "N/A")}</div>
+        <div style="font-size: 0.8em; color: var(--text-secondary);">${utils.escapeHtml(client.PhoneNumber || "")}</div>
       </td>
       <td>
-        ${client.country || client.Country || '<span class="text-muted">-</span>'}
+        ${client.Country ? utils.escapeHtml(client.Country) : '<span class="text-muted">-</span>'}
       </td>
       <td>
-        ${client.accountManagerName || client.AccountManagerName || '<span class="text-muted">-</span>'}
+        ${client.AccountManagerName ? utils.escapeHtml(client.AccountManagerName) : '<span class="text-muted">-</span>'}
       </td>
-      <td><span class="badge badge-info">${
-        client.projectCount || client.ProjectCount || 0
-      } projects</span></td>
+      <td><span class="badge badge-info">${utils.escapeHtml(String(client.ProjectCount ?? 0))} projects</span></td>
       <td>
         <div class="table-actions">
-          <button class="btn btn-sm btn-primary" onclick="editClient(${
-            client.clientId || client.ClientId
-          })">
+          <button class="btn btn-sm btn-primary" onclick="editClient(${Number(client.ClientId)})" aria-label="Edit ${utils.escapeHtml(client.Name || "")}">
             <i class="fa-solid fa-edit"></i>
           </button>
-          <button class="btn btn-sm btn-danger" onclick="deleteClient(${
-            client.clientId || client.ClientId
-          })">
+          <button class="btn btn-sm btn-danger" onclick="deleteClient(${Number(client.ClientId)})" aria-label="Delete ${utils.escapeHtml(client.Name || "")}">
             <i class="fa-solid fa-trash"></i>
           </button>
         </div>
@@ -238,16 +238,24 @@ function renderClients() {
 }
 
 function setupEventListeners() {
-  document
-    .getElementById("clientForm")
-    .addEventListener("submit", handleSubmit);
-  document
-    .getElementById("searchInput")
-    .addEventListener("input", handleSearch);
+  document.getElementById("clientForm").addEventListener("submit", handleSubmit);
+  document.getElementById("searchInput").addEventListener("input", utils.debounce(handleSearch, 300));
+
+  // Modal accessibility: close on Escape key and backdrop click
+  const modal = document.getElementById("clientModal");
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("d-none")) {
+      closeModal();
+    }
+  });
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
 }
 
-// Exposed globally for the HTML onchange attribute
-window.toggleOwnerFields = function() {
+window.toggleOwnerFields = function () {
   const ownerType = document.querySelector('input[name="ownerType"]:checked').value;
   const existingOwnerGroup = document.getElementById("existingOwnerGroup");
   const newOwnerCredentials = document.getElementById("newOwnerCredentials");
@@ -259,8 +267,6 @@ window.toggleOwnerFields = function() {
   if (ownerType === "existing") {
     existingOwnerGroup.classList.remove("d-none");
     newOwnerCredentials.classList.add("d-none");
-    
-    // Update required attributes
     usernameInput.required = false;
     passwordInput.required = false;
     if (ownerNameInput) ownerNameInput.required = false;
@@ -268,8 +274,6 @@ window.toggleOwnerFields = function() {
   } else {
     existingOwnerGroup.classList.add("d-none");
     newOwnerCredentials.classList.remove("d-none");
-    
-    // Update required attributes
     usernameInput.required = true;
     passwordInput.required = true;
     if (ownerNameInput) ownerNameInput.required = true;
@@ -280,7 +284,6 @@ window.toggleOwnerFields = function() {
 function handleSearch(e) {
   const searchTerm = e.target.value.toLowerCase();
   const rows = document.querySelectorAll("#clientsBody tr");
-
   rows.forEach((row) => {
     const text = row.textContent.toLowerCase();
     row.style.display = text.includes(searchTerm) ? "" : "none";
@@ -293,23 +296,32 @@ function showCreateModal() {
   document.getElementById("clientForm").reset();
   document.getElementById("accountManager").value = "";
   document.getElementById("country").value = "";
-  
-  // Show owner type selection
+
   const ownerTypeGroup = document.getElementById("ownerTypeGroup");
   if (ownerTypeGroup) ownerTypeGroup.style.display = "block";
-  
-  // Reset to "New User" by default
+
   const newOwnerRadio = document.querySelector('input[name="ownerType"][value="new"]');
   if (newOwnerRadio) {
     newOwnerRadio.checked = true;
     toggleOwnerFields();
   }
-  
-  document.getElementById("clientModal").classList.remove("d-none");
+
+  openModal();
+}
+
+function openModal() {
+  const modal = document.getElementById("clientModal");
+  modal.classList.remove("d-none");
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  // Focus the first input in the modal
+  const firstInput = modal.querySelector("input:not([type=hidden]):not([type=radio]), select");
+  if (firstInput) firstInput.focus();
 }
 
 function closeModal() {
-  document.getElementById("clientModal").classList.add("d-none");
+  const modal = document.getElementById("clientModal");
+  modal.classList.add("d-none");
   document.getElementById("clientForm").reset();
   currentEditId = null;
 }
@@ -318,12 +330,11 @@ async function editClient(id) {
   try {
     utils.showLoading();
 
-    // Fetch full client details from API
     let client = null;
     try {
       client = await API.Clients.getById(id);
     } catch (err) {
-      client = clients.find((c) => (c.clientId || c.ClientId) === id);
+      client = clients.find((c) => c.ClientId === id);
     }
 
     if (!client) {
@@ -335,41 +346,32 @@ async function editClient(id) {
     document.getElementById("modalTitle").textContent = "Edit Client";
     document.getElementById("clientId").value = id;
 
-    // Populate fields
-    document.getElementById("name").value = client.name || client.Name || "";
-    document.getElementById("email").value = client.email || client.Email || "";
-    document.getElementById("phoneNumber").value = client.phoneNumber || client.PhoneNumber || "";
-    document.getElementById("address").value = client.address || client.Address || "";
-    document.getElementById("country").value = client.country || client.Country || "";
+    document.getElementById("name").value = client.Name || "";
+    document.getElementById("email").value = client.Email || "";
+    document.getElementById("phoneNumber").value = client.PhoneNumber || "";
+    document.getElementById("address").value = client.Address || "";
+    document.getElementById("country").value = client.Country || "";
 
-    // Set accountManager
     if (document.getElementById("accountManager")) {
-      const acctId = client.accountManagerId || client.AccountManagerId || "";
-      document.getElementById("accountManager").value = acctId;
+      document.getElementById("accountManager").value = client.AccountManagerId || "";
     }
 
-    // Hide owner selection logic when editing (assuming we don't change owner here for now)
+    // Hide owner selection logic when editing
     const ownerTypeGroup = document.getElementById("ownerTypeGroup");
     const existingOwnerGroup = document.getElementById("existingOwnerGroup");
     const newOwnerCredentials = document.getElementById("newOwnerCredentials");
-    
+
     if (ownerTypeGroup) ownerTypeGroup.style.display = "none";
     if (existingOwnerGroup) existingOwnerGroup.classList.add("d-none");
     if (newOwnerCredentials) newOwnerCredentials.classList.add("d-none");
-    
-    // Remove required attributes
+
     document.getElementById("username").required = false;
     document.getElementById("password").required = false;
     document.getElementById("existingOwner").required = false;
-    if (document.getElementById("ownerName")) document.getElementById("ownerName").required = false;
+    const ownerNameInput = document.getElementById("ownerName");
+    if (ownerNameInput) ownerNameInput.required = false;
 
-    // Set accountManager
-    if (document.getElementById("accountManager")) {
-      const acctId = client.accountManagerId || client.AccountManagerId || client.AccountManager || null;
-      document.getElementById("accountManager").value = acctId || "";
-    }
-
-    document.getElementById("clientModal").classList.remove("d-none");
+    openModal();
   } catch (error) {
     console.error("Error opening edit modal:", error);
     utils.showError("Failed to load client details");
@@ -382,24 +384,49 @@ async function handleSubmit(e) {
   e.preventDefault();
 
   const clientData = {
-    Name: document.getElementById("name").value,
-    Email: document.getElementById("email").value,
-    PhoneNumber: document.getElementById("phoneNumber").value || null,
-    Address: document.getElementById("address").value || null,
+    Name: document.getElementById("name").value.trim(),
+    Email: document.getElementById("email").value.trim(),
+    PhoneNumber: document.getElementById("phoneNumber").value.trim() || null,
+    Address: document.getElementById("address").value.trim() || null,
     Country: document.getElementById("country").value || null,
     AccountManagerId: parseInt(document.getElementById("accountManager").value) || null,
   };
 
-  // Handle Owner Logic for Create
+  // Client-side length validation matching backend DTO limits
+  if (clientData.Name.length > 100) {
+    utils.showError("Company name must be 100 characters or less");
+    return;
+  }
+  if (clientData.Email.length > 100) {
+    utils.showError("Email must be 100 characters or less");
+    return;
+  }
+  if (clientData.PhoneNumber && clientData.PhoneNumber.length > 20) {
+    utils.showError("Phone number must be 20 characters or less");
+    return;
+  }
+  if (clientData.Address && clientData.Address.length > 200) {
+    utils.showError("Address must be 200 characters or less");
+    return;
+  }
+
   if (!currentEditId) {
     const ownerType = document.querySelector('input[name="ownerType"]:checked').value;
-    
+
     if (ownerType === "new") {
-      clientData.Username = document.getElementById("username").value;
+      clientData.Username = document.getElementById("username").value.trim();
       clientData.Password = document.getElementById("password").value;
-      clientData.OwnerName = document.getElementById("ownerName").value;
+      clientData.OwnerName = document.getElementById("ownerName").value.trim();
+
+      if (!clientData.Username || !clientData.Password || !clientData.OwnerName) {
+        utils.showError("Owner name, username, and password are required for new users");
+        return;
+      }
+      if (clientData.Password.length < 6) {
+        utils.showError("Password must be at least 6 characters");
+        return;
+      }
     } else {
-      // Existing owner
       const ownerId = document.getElementById("existingOwner").value;
       if (!ownerId) {
         utils.showError("Please select an existing owner");
@@ -437,13 +464,8 @@ async function handleSubmit(e) {
 }
 
 async function deleteClient(id) {
-  if (
-    !confirm(
-      "Are you sure you want to delete this client? This will affect all associated projects."
-    )
-  ) {
+  if (!utils.confirmAction("Are you sure you want to delete this client? This will affect all associated projects."))
     return;
-  }
 
   try {
     utils.showLoading();
@@ -452,7 +474,11 @@ async function deleteClient(id) {
     await loadData();
   } catch (error) {
     console.error("Error deleting client:", error);
-    utils.showError("Failed to delete client");
+    let msg = "Failed to delete client";
+    if (error && error.message) {
+      msg = error.message;
+    }
+    utils.showError(msg);
   } finally {
     utils.hideLoading();
   }

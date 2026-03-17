@@ -39,29 +39,21 @@ class APIClient {
       headers: this.getHeaders(options.includeAuth !== false),
     };
 
-    console.log(`[API] ${options.method || "GET"} ${url}`);
-
     try {
       const response = await fetch(url, config);
 
-      console.log(`[API] Response status: ${response.status}`);
-
       if (!response.ok) {
         if (response.status === 401 && !options.skipRedirectOn401) {
-          // Handle unauthorized
-          console.warn("[API] Unauthorized - clearing auth and redirecting");
           this.clearAuth();
           window.location.href = "../auth/login.html";
         }
         const errorText = await response.text().catch(() => "Unknown error");
-        console.error(`[API] Error response:`, errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const contentType = response.headers.get("content-type");
       if (contentType?.includes("application/json")) {
         const data = await response.json();
-        console.log(`[API] Success:`, data);
         return data;
       }
       return await response.text();
@@ -122,16 +114,14 @@ const API = {
       return client.post("/Auth/register", userData);
     },
     async logout() {
+      // No backend logout endpoint — just clear local auth data
       const client = new APIClient();
-      return client.post("/Auth/logout", {});
+      client.clearAuth();
+      return Promise.resolve();
     },
-    async changePassword(passwordData) {
+    async changePassword(data) {
       const client = new APIClient();
-      return client.post("/Auth/change-password", passwordData);
-    },
-    async me() {
-      const client = new APIClient();
-      return client.get("/Auth/me");
+      return client.post("/Auth/change-password", data);
     },
   },
 
@@ -246,14 +236,7 @@ const API = {
      * CURRENT WORKAROUND: Use Tasks.update() with status change
      */
     async approveForClient(id, notes) {
-      const client = new APIClient();
-      console.warn(
-        "[PLACEHOLDER API] approveForClient - Backend endpoint needed"
-      );
-      console.log(
-        "Expected endpoint: PUT /api/Tasks/" + id + "/approve-for-client"
-      );
-      // return client.put(`/Tasks/${id}/approve-for-client`, { notes });
+      // TODO: Implement PUT /api/Tasks/{id}/approve-for-client on backend
       throw new Error(
         "Backend endpoint not implemented. Use Tasks.update() workaround."
       );
@@ -270,14 +253,7 @@ const API = {
      * CURRENT WORKAROUND: Use Tasks.update() with status change
      */
     async sendBackForRework(id, feedback) {
-      const client = new APIClient();
-      console.warn(
-        "[PLACEHOLDER API] sendBackForRework - Backend endpoint needed"
-      );
-      console.log(
-        "Expected endpoint: PUT /api/Tasks/" + id + "/send-back-rework"
-      );
-      // return client.put(`/Tasks/${id}/send-back-rework`, { feedback });
+      // TODO: Implement PUT /api/Tasks/{id}/send-back-rework on backend
       throw new Error(
         "Backend endpoint not implemented. Use Tasks.update() workaround."
       );
@@ -294,12 +270,7 @@ const API = {
      * CURRENT WORKAROUND: Use Tasks.update() with status change
      */
     async clientApprove(id, notes, clientUserId) {
-      const client = new APIClient();
-      console.warn("[PLACEHOLDER API] clientApprove - Backend endpoint needed");
-      console.log(
-        "Expected endpoint: PUT /api/Tasks/" + id + "/client-approve"
-      );
-      // return client.put(`/Tasks/${id}/client-approve`, { notes, clientUserId });
+      // TODO: Implement PUT /api/Tasks/{id}/client-approve on backend
       throw new Error(
         "Backend endpoint not implemented. Use Tasks.update() workaround."
       );
@@ -316,10 +287,7 @@ const API = {
      * CURRENT WORKAROUND: Use Tasks.update() with status change
      */
     async clientReject(id, feedback, clientUserId) {
-      const client = new APIClient();
-      console.warn("[PLACEHOLDER API] clientReject - Backend endpoint needed");
-      console.log("Expected endpoint: PUT /api/Tasks/" + id + "/client-reject");
-      // return client.put(`/Tasks/${id}/client-reject`, { feedback, clientUserId });
+      // TODO: Implement PUT /api/Tasks/{id}/client-reject on backend
       throw new Error(
         "Backend endpoint not implemented. Use Tasks.update() workaround."
       );
@@ -336,14 +304,7 @@ const API = {
      * CURRENT WORKAROUND: Use Tasks.update() with status change
      */
     async submitForReview(id, notes) {
-      const client = new APIClient();
-      console.warn(
-        "[PLACEHOLDER API] submitForReview - Backend endpoint needed"
-      );
-      console.log(
-        "Expected endpoint: PUT /api/Tasks/" + id + "/submit-for-review"
-      );
-      // return client.put(`/Tasks/${id}/submit-for-review`, { notes });
+      // TODO: Implement PUT /api/Tasks/{id}/submit-for-review on backend
       throw new Error(
         "Backend endpoint not implemented. Use Tasks.update() workaround."
       );
@@ -387,6 +348,10 @@ const API = {
     async getAll() {
       const client = new APIClient();
       return client.get("/Users");
+    },
+    async getByRole(roleId) {
+      const client = new APIClient();
+      return client.get(`/Users/by-role/${roleId}`);
     },
     async getById(id) {
       const client = new APIClient();
@@ -489,12 +454,7 @@ const API = {
      * CURRENT WORKAROUND: None - feature unavailable
      */
     async getUsers(clientId) {
-      const client = new APIClient();
-      console.warn(
-        "[PLACEHOLDER API] Clients.getUsers - Backend endpoint needed"
-      );
-      console.log("Expected endpoint: GET /api/Clients/" + clientId + "/users");
-      // return client.get(`/Clients/${clientId}/users`);
+      // TODO: Implement GET /api/Clients/{id}/users on backend
       throw new Error("Backend endpoint not implemented");
     },
   },
@@ -624,24 +584,6 @@ const API = {
     },
   },
 
-  // Reporting Service
-  Reporting: {
-    async getEmployeeReport(userId, startDate, endDate) {
-      const client = new APIClient();
-      let url = `/Reporting/employee/${userId}?`;
-      if (startDate) url += `startDate=${startDate}&`;
-      if (endDate) url += `endDate=${endDate}`;
-      return client.get(url);
-    },
-    async getClientReport(clientId, startDate, endDate) {
-      const client = new APIClient();
-      let url = `/Reporting/client/${clientId}?`;
-      if (startDate) url += `startDate=${startDate}&`;
-      if (endDate) url += `endDate=${endDate}`;
-      return client.get(url);
-    },
-  },
-
   // Search Service
   Search: {
     async global(query, page = 1, pageSize = 10) {
@@ -728,7 +670,7 @@ const API = {
     },
   },
 
-  // Reporting Service (Fixed)
+  // Reporting Service
   Reporting: {
      async getEmployeeReport(userId, startDate, endDate) {
          const client = new APIClient();
@@ -800,13 +742,17 @@ const API = {
           const client = new APIClient();
           return client.get(`/Sales/weekly-war-room?userId=${userId}`);
       },
-      async setStrategy(dto) {
-          const client = new APIClient();
-          return client.post(`/Sales/weekly-war-room`, dto);
-      },
-      async getMarketSegments(status = '') {
-          const client = new APIClient();
-          let url = '/Sales/market-segments';
+       async setStrategy(dto) {
+           const client = new APIClient();
+           return client.post(`/Sales/weekly-war-room`, dto);
+       },
+       async reviewTask(dto) {
+           const client = new APIClient();
+           return client.post(`/Sales/review-task`, dto);
+       },
+       async getMarketSegments(status = '') {
+           const client = new APIClient();
+           let url = '/Sales/market-segments';
           if(status) url += `?status=${status}`;
           return client.get(url);
       },
@@ -843,5 +789,3 @@ const API = {
 
 // Export for use in other files
 window.API = API;
-
-console.log("[API] API object loaded successfully:", Object.keys(API));

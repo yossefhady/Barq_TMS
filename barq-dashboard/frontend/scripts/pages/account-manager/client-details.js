@@ -591,19 +591,9 @@ async function handleContractSubmit(e) {
       formData.append(`Files`, file);
     });
 
-    // TODO: Replace with actual API endpoint when available
-    // await API.Contracts.send(formData);
-
-    // Placeholder success
-    console.log("Contract data:", {
-      title,
-      description,
-      files: selectedFiles,
-      clientId,
-    });
-
-    utils.showSuccess(
-      `Contract "${title}" sent successfully with ${selectedFiles.length} file(s)`
+    // Contract sending is not yet supported by the backend.
+    utils.showWarning(
+      "Contract sending is not yet available. This feature is coming soon."
     );
     closeContractModal();
   } catch (error) {

@@ -27,14 +27,22 @@ async function loadDashboardData() {
     }
 
     // Fetch recent data for tables
-    const [tasks, projects] = await Promise.all([
+    const [tasks, projects, allUsers] = await Promise.all([
       API.Tasks.getAll().catch(() => []),
       API.Projects.getAll().catch(() => []),
+      API.Users.getAll().catch(() => []),
     ]);
 
     // Debug: Log the actual API response
     console.log("📋 Tasks from API:", tasks);
     console.log("📁 Projects from API:", projects);
+
+    // Team Members count: Assistant Manager (2), Account Manager (3), Team Leader (4), Employee (5)
+    const teamMemberCount = allUsers.filter(u => {
+      const role = u.Role !== undefined ? u.Role : (u.role !== undefined ? u.role : (u.RoleId !== undefined ? u.RoleId : u.roleId));
+      return role === 2 || role === 3 || role === 4 || role === 5;
+    }).length;
+    document.getElementById("totalEmployees").textContent = teamMemberCount;
 
     // Render recent data
     renderRecentTasks(tasks.slice(0, 10));
@@ -68,7 +76,7 @@ function updateStatsFromAPI(stats) {
 
   document.getElementById("totalTasks").textContent = getVal("TotalTasks", "totalTasks");
   document.getElementById("totalProjects").textContent = getVal("TotalProjects", "totalProjects");
-  document.getElementById("totalEmployees").textContent = getVal("TotalUsers", "totalUsers") - getVal("TotalClients", "totalClients"); 
+  // Team Members count is set separately from the Users API (only Employees + Team Leaders)
   document.getElementById("totalClients").textContent = getVal("TotalClients", "totalClients");
 }
 
