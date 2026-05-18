@@ -12,6 +12,7 @@ let currentFilter = { column: "", value: "" };
 let currentDeptType = null; // "creative" | "sales" | "mgmt" | null
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if (window.ReviewModal) ReviewModal.mount();
   await loadData();
   setupEventListeners();
 });
@@ -194,7 +195,7 @@ function populateFilterDropdowns() {
     sortedValues.forEach(val => {
       let label = val;
       if (column === 'StatusId') {
-        const statusMap = {0: "Pending", 1: "In Progress", 2: "In Review", 3: "Completed", 4: "Cancelled"};
+        const statusMap = {0: "Pending", 1: "In Progress", 2: "In Review", 3: "Completed", 4: "Closed"};
         label = statusMap[val] || `Status ${val}`;
       } else if (column === 'PriorityId') {
         const priorityMap = {0: "Low", 1: "Medium", 2: "High", 3: "Critical"};
@@ -568,9 +569,17 @@ async function deleteTask(id) {
   }
 }
 
-// --- Review Modal (unchanged logic) ---
+// --- Review Modal (delegates to shared component — HIGH-01) ---
 
-async function openReviewModal(taskId) {
+function openReviewModal(taskId) {
+  if (!window.ReviewModal) {
+    console.error("ReviewModal component not loaded");
+    return;
+  }
+  return ReviewModal.open(taskId, { onSubmitted: loadData });
+}
+
+async function _legacyOpenReviewModal_unused(taskId) {
   let task = tasks.find((t) => (t.taskId || t.TaskId || t.Id) == taskId);
   try {
     utils.showLoading();

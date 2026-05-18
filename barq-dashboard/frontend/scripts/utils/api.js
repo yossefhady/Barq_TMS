@@ -219,96 +219,11 @@ const API = {
       return client.get(`/Projects/${projectId}/tasks`);
     },
 
-    // ========================================================================
-    // ACCOUNT MANAGER REVIEW WORKFLOW - PLACEHOLDER ENDPOINTS
-    // ========================================================================
-    // These endpoints need to be implemented on the backend
-    // Current implementation uses workarounds with existing endpoints
-
-    /**
-     * PLACEHOLDER: Approve task and send to client
-     *
-     * BACKEND REQUIREMENT:
-     * Endpoint: PUT /api/Tasks/{id}/approve-for-client
-     * Body: { notes: string, accountManagerId: int }
-     * Updates: StatusId, AccountManagerApproved, SentToClient, AccountManagerNotes
-     *
-     * CURRENT WORKAROUND: Use Tasks.update() with status change
-     */
-    async approveForClient(id, notes) {
-      // TODO: Implement PUT /api/Tasks/{id}/approve-for-client on backend
-      throw new Error(
-        "Backend endpoint not implemented. Use Tasks.update() workaround."
-      );
-    },
-
-    /**
-     * PLACEHOLDER: Send task back to team leader for rework
-     *
-     * BACKEND REQUIREMENT:
-     * Endpoint: PUT /api/Tasks/{id}/send-back-rework
-     * Body: { feedback: string, accountManagerId: int }
-     * Updates: StatusId to IN_PROGRESS, clears approval flags
-     *
-     * CURRENT WORKAROUND: Use Tasks.update() with status change
-     */
-    async sendBackForRework(id, feedback) {
-      // TODO: Implement PUT /api/Tasks/{id}/send-back-rework on backend
-      throw new Error(
-        "Backend endpoint not implemented. Use Tasks.update() workaround."
-      );
-    },
-
-    /**
-     * PLACEHOLDER: Client approves task
-     *
-     * BACKEND REQUIREMENT:
-     * Endpoint: PUT /api/Tasks/{id}/client-approve
-     * Body: { notes: string, clientUserId: int }
-     * Updates: StatusId to CLIENT_APPROVED, ClientApproved = true, ClientReviewDate
-     *
-     * CURRENT WORKAROUND: Use Tasks.update() with status change
-     */
-    async clientApprove(id, notes, clientUserId) {
-      // TODO: Implement PUT /api/Tasks/{id}/client-approve on backend
-      throw new Error(
-        "Backend endpoint not implemented. Use Tasks.update() workaround."
-      );
-    },
-
-    /**
-     * PLACEHOLDER: Client rejects task with feedback
-     *
-     * BACKEND REQUIREMENT:
-     * Endpoint: PUT /api/Tasks/{id}/client-reject
-     * Body: { feedback: string, clientUserId: int }
-     * Updates: StatusId to CLIENT_REJECTED, ClientApproved = false, ClientFeedback
-     *
-     * CURRENT WORKAROUND: Use Tasks.update() with status change
-     */
-    async clientReject(id, feedback, clientUserId) {
-      // TODO: Implement PUT /api/Tasks/{id}/client-reject on backend
-      throw new Error(
-        "Backend endpoint not implemented. Use Tasks.update() workaround."
-      );
-    },
-
-    /**
-     * PLACEHOLDER: Team leader submits task for account manager review
-     *
-     * BACKEND REQUIREMENT:
-     * Endpoint: PUT /api/Tasks/{id}/submit-for-review
-     * Body: { notes: string, teamLeaderId: int }
-     * Updates: StatusId to PENDING_AM_REVIEW, SubmittedForReview = true
-     *
-     * CURRENT WORKAROUND: Use Tasks.update() with status change
-     */
-    async submitForReview(id, notes) {
-      // TODO: Implement PUT /api/Tasks/{id}/submit-for-review on backend
-      throw new Error(
-        "Backend endpoint not implemented. Use Tasks.update() workaround."
-      );
-    },
+    // CRIT-05: AM/Client review workflow is unimplemented. The previous
+    // placeholders threw on call from the UI. They have been removed; any
+    // call site that depends on these methods should be updated to the
+    // standard requestComplete / reviewCompletion endpoints, or the page
+    // should be disabled until the full workflow is designed.
   },
 
   // Projects Service

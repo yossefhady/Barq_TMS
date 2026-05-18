@@ -257,64 +257,28 @@ function closeReviewModal() {
   currentReviewTask = null;
 }
 
-// Approve task
+// CRIT-04: Client approve/reject removed pending a real backend endpoint
+// (see AUDIT.md). The previous implementation sent non-existent status strings.
+// Until the workflow is designed, clients can only add a feedback comment.
 async function approveTask() {
-  if (!currentReviewTask) return;
-
-  const feedback = document.getElementById("clientFeedback").value;
-
-  try {
-    // Update task status to client approved
-    await API.Tasks.update(currentReviewTask.id, {
-      status: "ClientApproved",
-      clientFeedback: feedback,
-    });
-
-    // Add comment
-    if (feedback) {
-      await API.Tasks.addComment(currentReviewTask.id, {
-        comment: `Task approved by client: ${feedback}`,
-      });
-    }
-
-    showNotification("Task approved successfully", "success");
-    closeReviewModal();
-    loadTasks();
-  } catch (error) {
-    console.error("Failed to approve task:", error);
-    showNotification("Failed to approve task", "error");
-  }
+  showNotification("Client approve flow is not yet enabled — please leave a comment instead.", "info");
 }
 
-// Reject task
 async function rejectTask() {
   if (!currentReviewTask) return;
-
   const feedback = document.getElementById("clientFeedback").value;
-
   if (!feedback.trim()) {
-    showNotification("Please provide feedback for rejection", "warning");
+    showNotification("Please provide feedback to send a comment", "warning");
     return;
   }
-
   try {
-    // Update task status to client rejected
-    await API.Tasks.update(currentReviewTask.id, {
-      status: "ClientRejected",
-      clientFeedback: feedback,
-    });
-
-    // Add comment
-    await API.Tasks.addComment(currentReviewTask.id, {
-      comment: `Task rejected by client - Needs revision: ${feedback}`,
-    });
-
-    showNotification("Task rejected and sent back for revision", "info");
+    await API.Tasks.addComment(currentReviewTask.id, { comment: `[Client feedback] ${feedback}` });
+    showNotification("Feedback sent to account manager", "success");
     closeReviewModal();
     loadTasks();
   } catch (error) {
-    console.error("Failed to reject task:", error);
-    showNotification("Failed to reject task", "error");
+    console.error("Failed to send feedback:", error);
+    showNotification("Failed to send feedback", "error");
   }
 }
 

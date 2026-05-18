@@ -8,6 +8,7 @@ let currentTaskForAction = null;
 let currentUser = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if (window.ReviewModal) ReviewModal.mount();
   currentUser = auth.getCurrentUser();
   await loadData();
   setupEventListeners();

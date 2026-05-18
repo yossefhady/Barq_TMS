@@ -11,9 +11,16 @@ let currentEditId = null;
 let currentDeptType = null; // "creative" | "sales" | "mgmt" | null
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if (window.ReviewModal) ReviewModal.mount();
   await loadData();
   setupEventListeners();
 });
+
+// CRIT-02: Asst Manager review entry point — delegates to shared component.
+function openReviewModal(taskId) {
+  if (!window.ReviewModal) { console.error("ReviewModal not loaded"); return; }
+  return ReviewModal.open(taskId, { onSubmitted: () => (typeof loadData === "function" ? loadData() : null) });
+}
 
 async function loadData() {
   try {
@@ -208,6 +215,7 @@ function renderTasks() {
       <td>${utils.formatDate(task.DueDate || task.dueDate)}</td>
       <td>
         <div class="table-actions">
+          ${statusId === 2 ? `<button class="btn btn-sm btn-warning" onclick="openReviewModal(${taskId})" title="Review completed task"><i class="fa-solid fa-clipboard-check"></i></button>` : ""}
           <button class="btn btn-sm btn-primary" onclick="editTask(${taskId})">
             <i class="fa-solid fa-pen"></i>
           </button>

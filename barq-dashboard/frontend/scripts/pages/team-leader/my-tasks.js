@@ -14,6 +14,7 @@ let currentEditId = null; // reused if we eventually allow editing self tasks
 
 // Initialize
 document.addEventListener("DOMContentLoaded", async () => {
+  if (window.ReviewModal) ReviewModal.mount();
   currentUser = auth.getCurrentUser();
   if (currentUser && currentUser.UserId === undefined && currentUser.userId !== undefined) {
     currentUser.UserId = currentUser.userId;
@@ -622,7 +623,12 @@ async function requestCompletion(taskId) {
 }
 
 // Open review modal for team member tasks
-async function openReviewModal(taskId) {
+function openReviewModal(taskId) {
+  if (!window.ReviewModal) { console.error("ReviewModal not loaded"); return; }
+  return ReviewModal.open(taskId, { onSubmitted: () => (typeof loadData === "function" ? loadData() : null) });
+}
+
+async function _legacyOpenReviewModal_unused(taskId) {
   // We need full details for Description (TaskListDto usually doesn't have Description)
   let task = allTasks.find((t) => t.TaskId === taskId);
   

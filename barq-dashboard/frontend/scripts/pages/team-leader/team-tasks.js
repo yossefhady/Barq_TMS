@@ -10,6 +10,7 @@ let departments = [];
 let currentUser = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if (window.ReviewModal) ReviewModal.mount();
   currentUser = auth.getCurrentUser();
   await loadTeamTasks();
   setupEventListeners();
@@ -101,7 +102,7 @@ async function loadTeamTasks() {
         { StatusId: 1, StatusName: "In Progress" },
         { StatusId: 2, StatusName: "In Review" },
         { StatusId: 3, StatusName: "Completed" },
-        { StatusId: 4, StatusName: "Cancelled" }
+        { StatusId: 4, StatusName: "Closed" }
       ];
     }
 
@@ -773,8 +774,13 @@ function closeTaskDetailsModal() {
   document.getElementById("taskDetailsModal").classList.add("d-none");
 }
 
-// Open review modal
-async function openReviewModal(taskId) {
+// Open review modal — delegates to shared component (HIGH-01)
+function openReviewModal(taskId) {
+  if (!window.ReviewModal) { console.error("ReviewModal not loaded"); return; }
+  return ReviewModal.open(taskId, { onSubmitted: () => (typeof loadTeamTasks === "function" ? loadTeamTasks() : null) });
+}
+
+async function _legacyOpenReviewModal_unused(taskId) {
   const task = allTasks.find((t) => (t.taskId || t.TaskId || t.Id) == taskId);
   if (!task) return;
 

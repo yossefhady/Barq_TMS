@@ -264,19 +264,14 @@
               >
                 Cancel
               </button>
+              <!-- CRIT-04: approve/reject buttons disabled until backend flow exists.
+                   Client can send written feedback instead. -->
               <button
                 type="button"
-                class="btn btn-danger"
+                class="btn btn-primary"
                 onclick="rejectTask()"
               >
-                <i class="fa-solid fa-times"></i> Reject Task
-              </button>
-              <button
-                type="button"
-                class="btn btn-success"
-                onclick="approveTask()"
-              >
-                <i class="fa-solid fa-check"></i> Approve Task
+                <i class="fa-solid fa-comment"></i> Send Feedback
               </button>
             </div>
           </div>

@@ -1,2 +1,22 @@
 publish/
-backend/
+barq_publish/
+
+# Build / IDE artifacts inside backend/ and tests/
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Local SQLite dev DB
+backend/barqTmsDB.db
+
+# Secrets — commit appsettings.example.json instead
+backend/appsettings.json
+backend/appsettings.*.json
+!backend/appsettings.example.json
+
+# Misc local files
+backend/init_db.sql
+backend/seed.sql
+backend/production_setup.sql
+backend/web.config

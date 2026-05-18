@@ -368,7 +368,7 @@
     </div>
 
     <!-- Review Task Modal -->
-    <div id="reviewModal" class="modal-backdrop d-none">
+    <template id="reviewModal_legacy_template">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -442,7 +442,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </template>
 
     <!-- SignalR Client -->
     <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
@@ -455,6 +455,7 @@
     <!-- Notification System -->
     <script src="../../scripts/utils/notifications.js"></script>
     <script src="../../scripts/components/notification-panel.js"></script>
+    <script src="../../scripts/components/review-modal.js"></script>
 
     <script src="../../scripts/pages/account-manager/my-tasks.js"></script>
   </body>

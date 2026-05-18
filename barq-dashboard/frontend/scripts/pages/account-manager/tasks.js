@@ -23,6 +23,7 @@ const TASK_STATUS = {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if (window.ReviewModal) ReviewModal.mount();
   currentUser = auth.getCurrentUser();
   await loadTasks();
   setupEventListeners();
