@@ -4,11 +4,21 @@ on:
   push:
     branches:
       - main
+    paths:
+      # Only re-deploy when something the site actually serves changes.
+      - 'barq-dashboard/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch: {}
 
 permissions:
   contents: read
   pages: write
   id-token: write
+
+# Only one active deploy at a time; cancel in-flight runs when a new push lands.
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   deploy:
